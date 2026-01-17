@@ -129,7 +129,7 @@ UIWindow
       image-color: #363636
       text: OFFLINE
       color: red
-    $on
+    $on:
       opacity: 1.00
       color: #7CFC00
       text: ONLINE
