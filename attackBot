@@ -17,9 +17,6 @@ Panel
     font: verdana-9px
     color: white
     image-source: /images/ui/button_rounded
-    $on:
-      font: verdana-9px
-      color: green
 
   Button
     id: settings
