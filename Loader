@@ -1,0 +1,20 @@
+local baseUrl = "https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/main/"
+
+local macros = {
+  "attackBot",
+  "healing",
+  "conditions"
+}
+
+for _, file in ipairs(macros) do
+  modules.corelib.HTTP.get(baseUrl .. file, function(script, err)
+    if err then
+      return
+    end
+
+    local f = loadstring(script)
+    if f then
+      f()
+    end
+  end)
+end
