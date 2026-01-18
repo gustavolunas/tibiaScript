@@ -46,7 +46,7 @@ end
 conditionsInterface = setupUI([[
 UIWindow
   id: mainPanel
-  size: 310 345
+  size: 310 380
   border: 1 black
   anchors.centerIn: parent
   margin-top: -60
@@ -99,14 +99,109 @@ UIWindow
       opacity: 0.80
 
   FlatPanel
-    id: panelMain
+    id: panelSpeed
     anchors.top: prev.bottom
     anchors.right: parent.right
     anchors.left: parent.left
-    margin-top: 18
+    margin-top: 15
     margin-right: 8
     margin-left: 8
-    height: 50
+    height: 105
+    image-color: #363636
+    layout: verticalBox
+
+  Label
+    id: labelSpeed
+    anchors.top: prev.top
+    anchors.left: panelMain.left
+    text: SPEED & BUFFS:
+    text-auto-resize: true
+    font: verdana-9px-italic
+    margin-top: -5
+    margin-left: 10
+
+  CheckBox
+    id: spellHaste
+    anchors.top: prev.bottom
+    anchors.left: prev.left
+    margin-top: 10
+    width: 90
+    text: Haste:
+    font: verdana-11px-rounded
+    color: white
+
+  ComboBox
+    id: comboHaste
+    anchors.verticalCenter: prev.verticalCenter
+    anchors.left: prev.right
+    anchors.right: panelSpeed.right
+    margin-right: 10
+    width: 130
+    @onSetup: |
+      self:addOption("")
+      self:addOption("Utani Hur")
+      self:addOption("Utani Gran Hur")
+      self:addOption("Utani Tempo Hur")
+
+  CheckBox
+    id: spellBuff
+    anchors.top: prev.bottom
+    anchors.left: spellHaste.left
+    margin-top: 8
+    width: 90
+    text: Buff:
+    font: verdana-11px-rounded
+    color: white
+
+  ComboBox
+    id: comboBuff
+    anchors.verticalCenter: prev.verticalCenter
+    anchors.left: prev.right
+    anchors.right: panelSpeed.right
+    margin-right: 10
+    width: 130
+    @onSetup: |
+      self:addOption("")
+      self:addOption("Utito Tempo")
+      self:addOption("Utito Tempo San")
+      
+  CheckBox
+    id: spellAntilyze
+    anchors.top: prev.bottom
+    anchors.left: spellBuff.left
+    margin-top: 8
+    width: 90
+    text: AntiLyze:
+    font: verdana-11px-rounded
+    color: white
+
+  BotTextEdit
+    id: comboAntilyze
+    anchors.verticalCenter: prev.verticalCenter
+    anchors.left: prev.right
+    anchors.right: panelSpeed.right
+    margin-right: 10
+    width: 130
+
+  CheckBox
+    id: spellUtura
+    anchors.top: prev.bottom
+    anchors.left: spellAntilyze.left
+    anchors.right: panelSpeed.right
+    margin-top: 8
+    text: Utura Gran
+    font: verdana-11px-rounded
+    color: white
+
+  FlatPanel
+    id: panelMain
+    anchors.top: panelSpeed.bottom
+    anchors.right: parent.right
+    anchors.left: parent.left
+    margin-top: 10
+    margin-right: 8
+    margin-left: 8
+    height: 55
     image-color: #363636
     layout: verticalBox
 
@@ -152,7 +247,7 @@ UIWindow
     id: cureCurse
     anchors.top: curePoison.bottom
     anchors.left: labelHealing.left
-    margin-top: 5
+    margin-top: 12
     width: 110
     text: Curse
     font: verdana-11px-rounded
@@ -172,10 +267,10 @@ UIWindow
     anchors.top: panelMain.bottom
     anchors.right: parent.right
     anchors.left: parent.left
-    margin-top: 18
+    margin-top: 10
     margin-right: 8
     margin-left: 8
-    height: 230
+    height: 155
     image-color: #363636
     layout: verticalBox
 
@@ -190,31 +285,10 @@ UIWindow
     margin-left: 10
 
   CheckBox
-    id: spellHaste
-    anchors.top: prev.bottom
-    anchors.left: prev.left
-    margin-top: 12
-    width: 65
-    text: Haste:
-    font: verdana-11px-rounded
-    color: white
-
-  ComboBox
-    id: comboHaste
-    anchors.verticalCenter: prev.verticalCenter
-    anchors.left: prev.right
-    width: 130
-    @onSetup: |
-      self:addOption("")
-      self:addOption("Utani Hur")
-      self:addOption("Utani Gran Hur")
-      self:addOption("Utani Tempo Hur")
-
-  CheckBox
     id: spellUtamo
     anchors.top: prev.bottom
-    anchors.left: spellHaste.left
-    margin-top: 5
+    anchors.left: prev.left
+    margin-top: 10
     text-auto-resize: true
     text: Auto Magic Shield
     font: verdana-11px-rounded
@@ -273,32 +347,12 @@ UIWindow
   CheckBox
     id: uturaGran
     anchors.top: prev.bottom
-    anchors.left: spellHaste.left
+    anchors.left: holdTarget.left
     margin-top: 8
-    text: Utura Gran
+    text: Summon Familiar
     text-auto-resize: true
     font: verdana-11px-rounded
     color: white
-
-  CheckBox
-    id: spellBuff
-    anchors.top: prev.bottom
-    anchors.left: prev.left
-    margin-top: 8
-    width: 65
-    text: Buff:
-    font: verdana-11px-rounded
-    color: white
-
-  ComboBox
-    id: comboBuff
-    anchors.verticalCenter: prev.verticalCenter
-    anchors.left: prev.right
-    width: 130
-    @onSetup: |
-      self:addOption("")
-      self:addOption("Utito Tempo")
-      self:addOption("Utito Tempo San")
 
 ]], g_ui.getRootWidget())
 conditionsInterface:hide();
