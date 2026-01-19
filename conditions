@@ -345,7 +345,7 @@ UIWindow
     color: white
 
   CheckBox
-    id: uturaGran
+    id: summonFamiliar
     anchors.top: prev.bottom
     anchors.left: holdTarget.left
     margin-top: 8
@@ -369,4 +369,378 @@ conditionsButton.settings.onClick = function()
     end
 end
 
-warn("CONDITIONS EM DESENVOLVIMENTO...")
+local panelName = "conditionsInterface"
+
+if not storage[panelName] then
+  storage[panelName] = {
+    checks = {},
+    combos = {},
+    texts  = {}
+  }
+end
+
+local function bindCheck(id)
+  local w = conditionsInterface[id]
+  if not w then return end
+
+  if storage[panelName].checks[id] ~= nil then
+    w:setChecked(storage[panelName].checks[id] and true or false)
+  else
+    storage[panelName].checks[id] = w:isChecked() and true or false
+  end
+
+  w.onCheckChange = function(widget, checked)
+    storage[panelName].checks[id] = checked and true or false
+  end
+end
+
+local function bindCombo(id)
+  local combo = conditionsInterface[id]
+  if not combo then return end
+
+  if storage[panelName].combos[id] ~= nil then
+    combo:setCurrentOption(storage[panelName].combos[id])
+  else
+    storage[panelName].combos[id] = combo:getCurrentOption()
+  end
+
+  combo.onOptionChange = function(widget, option)
+    storage[panelName].combos[id] = option
+  end
+end
+
+local function bindText(id)
+  local w = conditionsInterface[id]
+  if not w then return end
+
+  if storage[panelName].texts[id] ~= nil then
+    w:setText(tostring(storage[panelName].texts[id]))
+  else
+    storage[panelName].texts[id] = w:getText() or ""
+  end
+
+  w.onTextChange = function(widget, text)
+    storage[panelName].texts[id] = tostring(text or "")
+  end
+end
+
+bindCheck("spellHaste")
+bindCombo("comboHaste")
+
+bindCheck("spellBuff")
+bindCombo("comboBuff")
+
+bindCheck("spellAntilyze")
+bindText("comboAntilyze")
+
+bindCheck("spellUtura")
+
+bindCheck("curePoison")
+bindCheck("cureFire")
+bindCheck("cureEnergy")
+bindCheck("cureCurse")
+bindCheck("cureBleeding")
+
+bindCheck("spellUtamo")
+bindCheck("spellUtana")
+bindCheck("exetaRes")
+bindCheck("exetaAmpRes")
+bindCheck("exetaLoot")
+bindCheck("holdTarget")
+bindCheck("summonFamiliar")
+
+local userUturaTimer = 0
+local userBuffTimer = 0
+
+onTalk(function(name, level, mode, text, channelId, pos)
+    if name ~= g_game.getLocalPlayer():getName() then return end
+    text = text:lower()
+    if text == 'utura gran' then
+       userUturaTimer = now + 60500 
+    end
+    if text == 'utito tempo' or text == 'utito tempo san' then
+        userBuffTimer = now + 10500
+    end
+end)
+
+macro(200,  function()
+    if not storage["conditionsButton"] or not storage["conditionsButton"].enabled then return end
+    
+    local player = g_game.getLocalPlayer()
+    if not player then return end
+    if player:isNpc() then return end
+
+    local cfg = storage["conditionsInterface"]
+    if not cfg then return end
+
+    if cfg.checks["spellAntilyze"] then
+        if isParalyzed() then
+            local spell = cfg.texts["comboAntilyze"]
+            if spell and spell ~= "" then
+                say(spell)
+                return
+            end
+        end
+    end
+
+    if cfg.checks["spellHaste"] then
+        if not hasHaste() and not isParalyzed() then
+            local spell = cfg.combos["comboHaste"]
+            if spell and spell ~= "" then
+                say(spell)
+            end
+        end
+    end
+
+    if cfg.checks["spellBuff"] then
+        if g_game.isAttacking() and not hasPartyBuff() and (now > userBuffTimer) then
+            local spell = cfg.combos["comboBuff"]
+            if spell and spell ~= "" then
+                say(spell)
+                userBuffTimer = now + 1000 
+            end
+        end
+    end
+
+    if cfg.checks["spellUtura"] then
+        if player:getMana() >= 200 and (now > userUturaTimer) then
+          say("utura gran")
+          userUturaTimer = now + 2000 
+        end
+    end
+end)
+
+macro(200, function()
+  if not storage[switchConditions] or not storage[switchConditions].enabled then return end
+  if not storage[panelName] or not storage[panelName].checks then return end
+
+  local checks = storage[panelName].checks
+
+  if checks.curePoison and isPoisioned() then
+    say('exana pox')
+    return
+  end
+
+  if checks.cureFire and isBurning() then
+    say('exana flam')
+    return
+  end
+
+  if checks.cureEnergy and isEnergized() then
+    say('exana vis')
+    return
+  end
+
+  if checks.cureCurse and isCursed() then
+    say('exana mort')
+    return
+  end
+
+  if checks.cureBleeding and isBleeding() then
+    say('exana kor')
+    return
+  end
+end)
+
+macro(200, function()
+  if not storage["conditionsButton"] or not storage["conditionsButton"].enabled then return end
+  if not storage["conditionsInterface"] or not storage["conditionsInterface"].checks then return end
+  if not storage["conditionsInterface"].checks.spellUtamo then return end
+
+  if not hasManaShield() then
+    say("utamo vita")
+  end
+end)
+
+local utanaCast = 0
+macro(200, function()
+  if not storage["conditionsButton"] or not storage["conditionsButton"].enabled then return end
+  if not storage["conditionsInterface"] or not storage["conditionsInterface"].checks then return end
+  if not storage["conditionsInterface"].checks.spellUtana then return end
+
+  if mana() < 441 then return end
+  if utanaCast > 0 and (now - utanaCast < 120000) then return end
+
+  say("utana vid")
+  utanaCast = now
+end)
+
+local lastExetaRes = 0
+local exetaResCooldown = 2000
+macro(200, function()
+  if not storage["conditionsButton"] or not storage["conditionsButton"].enabled then return end
+  if not storage["conditionsInterface"] or not storage["conditionsInterface"].checks then return end
+  if not storage["conditionsInterface"].checks.exetaRes then return end
+  if isInPz() then return end
+  if not g_game.isAttacking() then return end
+  if now - lastExetaRes < exetaResCooldown then return end
+
+  say("exeta res")
+  lastExetaRes = now
+end)
+
+local lastExetaAmpRes = 0
+local exetaAmpResCooldown = 6000
+macro(200, function()
+  if not storage["conditionsButton"] or not storage["conditionsButton"].enabled then return end
+  if not storage["conditionsInterface"] or not storage["conditionsInterface"].checks then return end
+  if not storage["conditionsInterface"].checks.exetaAmpRes then return end
+  if isInPz() then return end
+  if not g_game.isAttacking() then return end
+  if now - lastExetaAmpRes < exetaAmpResCooldown then return end
+
+  say("exeta amp res")
+  lastExetaAmpRes = now
+end)
+
+local targetID = nil
+
+onKeyPress(function(keys)
+    if keys == "Escape" and targetID then
+        targetID = nil
+    end
+end)
+
+macro(100, function()
+  if not storage["conditionsButton"] or not storage["conditionsButton"].enabled then return end
+  if not storage["conditionsInterface"] or not storage["conditionsInterface"].checks then return end
+  if not storage["conditionsInterface"].checks.holdTarget then return end
+
+    if target() and target():getPosition().z == posz() and not target():isNpc() then
+        targetID = target():getId()
+    elseif not target() then
+        if not targetID then return end
+
+        for i, spec in ipairs(getSpectators()) do
+            local sameFloor = spec:getPosition().z == posz()
+            local oldTarget = spec:getId() == targetID
+            
+            if sameFloor and oldTarget then
+                attack(spec)
+            end
+        end
+    end
+end)
+
+local vocationsMap = {
+  [1] = "Knight", [2] = "Paladin", [3] = "Sorcerer", [4] = "Druid",
+  [5] = "Monk",
+  [6] = "Elite Knight", [7] = "Royal Paladin", [8] = "Master Sorcerer", [9] = "Elder Druid",
+  [10] = "Exalted Monk"
+}
+
+local function getVocationType(player)
+  if not player then return "knight" end
+  local vocId = player:getVocation()
+  local vocName = vocationsMap[vocId] or "Unknown"
+
+  if vocName == "Knight" or vocName == "Elite Knight" then
+    return "knight"
+  elseif vocName == "Paladin" or vocName == "Royal Paladin" then
+    return "paladin"
+  elseif vocName == "Sorcerer" or vocName == "Master Sorcerer" then
+    return "sorcerer"
+  elseif vocName == "Druid" or vocName == "Elder Druid" then
+    return "druid"
+  elseif vocName == "Monk" or vocName == "Exalted Monk" then
+    return "monk"
+  end
+
+  return "knight"
+end
+
+local familiarSpellByVoc = {
+  knight   = "utevo gran res eq",
+  paladin = "utevo gran res sac",
+  sorcerer= "utevo gran res ven",
+  druid   = " utevo gran res dru",
+  monk    = "utevo gran res tio"
+}
+
+local lastSummon = 0
+local summonCooldown = 1 * 60 * 1000
+
+macro(500, function()
+  if not storage["conditionsButton"] or not storage["conditionsButton"].enabled then return end
+  if not storage["conditionsInterface"] or not storage["conditionsInterface"].checks then return end
+  if not storage["conditionsInterface"].checks.summonFamiliar then return end
+
+  local player = g_game.getLocalPlayer()
+  if not player then return end
+
+  if lastSummon > 0 and (now - lastSummon < summonCooldown) then return end
+
+  local vocType = getVocationType(player)
+  local spell = familiarSpellByVoc[vocType]
+  if not spell or spell == "" then return end
+
+  say(spell)
+  lastSummon = now
+end)
+
+local function countMonstersAround(range)
+  local me = pos()
+  if not me then return 0 end
+
+  local count = 0
+  for _, c in ipairs(getSpectators(false)) do
+    if c and c.isMonster and c:isMonster() then
+      local p = c:getPosition()
+      if p and p.z == me.z then
+        local dx = math.abs(p.x - me.x)
+        local dy = math.abs(p.y - me.y)
+        if math.max(dx, dy) <= range then
+          count = count + 1
+        end
+      end
+    end
+  end
+  return count
+end
+
+
+local lastExetaLoot = 0
+local exetaLootCooldown = 2000
+local rangeCheck = 3
+
+local lastMobsAround = 0
+local lastHadTarget = 0
+local fightGraceMs = 2000
+
+macro(200, function()
+  if not storage["conditionsButton"] or not storage["conditionsButton"].enabled then return end
+  if not storage["conditionsInterface"] or not storage["conditionsInterface"].checks then return end
+  if not storage["conditionsInterface"].checks.exetaLoot then return end
+  if isInPz() then return end
+  if now - lastExetaLoot < exetaLootCooldown then return end
+
+  if g_game.isAttacking() then
+    lastHadTarget = now
+  end
+
+  local mobsAround = 0
+  local me = pos()
+  if not me then return end
+
+  for _, c in ipairs(getSpectators(false)) do
+    if c and c.isMonster and c:isMonster() then
+      local p = c:getPosition()
+      if p and p.z == me.z then
+        local dx = math.abs(p.x - me.x)
+        local dy = math.abs(p.y - me.y)
+        if math.max(dx, dy) <= rangeCheck then
+          mobsAround = mobsAround + 1
+        end
+      end
+    end
+  end
+
+  local hadRealFight = (lastHadTarget > 0 and (now - lastHadTarget) <= fightGraceMs)
+
+  if lastMobsAround > 0 and mobsAround == 0 and not g_game.isAttacking() and hadRealFight then
+    say("exeta loot")
+    lastExetaLoot = now
+  end
+
+  lastMobsAround = mobsAround
+end)
