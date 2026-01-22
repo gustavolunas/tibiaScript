@@ -1358,6 +1358,26 @@ updateSpellPanelLabels()
 updateRunePanelLabels()
 refreshList()
 
+local function resetRuntimeCooldowns()
+  if cfg and cfg.actions then
+    for _, a in ipairs(cfg.actions) do
+      a.nextCast = 0
+    end
+  end
+  userRune = 0
+end
+
+resetRuntimeCooldowns()
+
+-- quando troca de char / reconecta
+if g_game and connect then
+  connect(g_game, {
+    onGameStart = function()
+      resetRuntimeCooldowns()
+    end
+  })
+end
+
 local function showMessage(msg)
     if modules and modules.game_textmessage and modules.game_textmessage.displayGameMessage then
       modules.game_textmessage.displayGameMessage(msg)
