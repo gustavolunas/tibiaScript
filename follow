@@ -155,6 +155,9 @@ UIWindow
     anchors.left: navLabel.left
     margin-top: 10
     text: Leader Attack:
+    font: verdana-11px-rounded
+    text-auto-resize: true
+    color: gray
 
   BotTextEdit
     id: navAttack
@@ -162,13 +165,17 @@ UIWindow
     anchors.left: prev.left
     anchors.right: navConfig.right
     margin-right: 5
-
+    image-color: gray
+    
   Label
     id: labelFollow
     anchors.top: prev.bottom
     anchors.left: prev.left
     margin-top: 10
     text: Player Follow:
+    font: verdana-11px-rounded
+    text-auto-resize: true
+    color: gray
 
   BotTextEdit
     id: navLeader
@@ -176,37 +183,30 @@ UIWindow
     anchors.left: prev.left
     anchors.right: navConfig.right
     margin-right: 5
+    image-color: gray
 
   CheckBox
     id: attackCheck
     anchors.top: prev.bottom
     anchors.left: prev.left
     text-auto-resize: true
-    font: verdana-11px-rounded
+    image-source: /images/ui/checkbox_round
+    font: verdana-9px-italic
     color: gray
     margin-top: 12
     margin-left: 0
-    $checked:
-      text: Attack Leader [ON]
-      image-color: green
-    $!checked:
-      text: Attack Leader [OFF]
-      image-color: red
+    text: ATTACK LEADER
 
   CheckBox
     id: followCheck
     anchors.top: prev.bottom
     anchors.left: prev.left
     text-auto-resize: true
-    font: verdana-11px-rounded
+    image-source: /images/ui/checkbox_round
+    font: verdana-9px-italic
     color: gray
     margin-top: 7
-    $checked:
-      text: Follow Player [ON]
-      image-color: green
-    $!checked:
-      text: Follow Player [OFF]
-      image-color: red
+    text: FOLLOW PLAYER
 
   FlatPanel
     id: navUEConfig
@@ -234,6 +234,9 @@ UIWindow
     anchors.left: UELabel.left
     margin-top: 10
     text: Leader UE:
+    text-auto-resize: true
+    font: verdana-11px-rounded
+    color: gray
 
   BotTextEdit
     id: UELeader
@@ -241,13 +244,18 @@ UIWindow
     anchors.left: prev.left
     anchors.right: navUEConfig.right
     margin-right: 5
+    image-color: gray
 
   Label
-    id: UESpell
-    anchors.top: prev.bottom
-    anchors.left: prev.left
+    id: UESpellLabel
+    anchors.top: UELeader.bottom
+    anchors.left: UELeader.left
     margin-top: 10
     text: UE Spell:
+    text-auto-resize: true
+    font: verdana-11px-rounded
+    color: gray
+    visible: true
 
   BotTextEdit
     id: UESpell
@@ -255,22 +263,19 @@ UIWindow
     anchors.left: prev.left
     anchors.right: navConfig.right
     margin-right: 5
+    image-color: gray
 
   CheckBox
     id: useUEcheck
     anchors.top: prev.bottom
     anchors.left: prev.left
     text-auto-resize: true
-    font: verdana-11px-rounded
+    image-source: /images/ui/checkbox_round
+    font: verdana-9px-italic
     color: gray
     margin-top: 12
     margin-left: 0
-    $checked:
-      text: Usar UE [ON]
-      image-color: green
-    $!checked:
-      text: Usar UE [OFF]
-      image-color: red
+    text: USAR UE
 
   FlatPanel
     id: toolsNav
@@ -296,21 +301,24 @@ UIWindow
     anchors.top: toolsNavLabel.bottom
     anchors.left: toolsNavLabel.left
     margin-top: 10
-    text: Rope Id:
-
+    text: ROPE ID:
+    font: verdana-9px-italic
+    
   BotTextEdit
     id: ropeID
     anchors.top: prev.bottom
     anchors.left: prev.left
     anchors.right: toolsNav.right
     margin-right: 5
+    image-color: gray
 
   Label
     id: RopeLabel
     anchors.top: prev.bottom
     anchors.left: toolsNavLabel.left
     margin-top: 10
-    text: Ids Corda:
+    text: IDS CORDA:
+    font: verdana-9px-italic
 
   BotContainer
     id: ropeIds
@@ -326,7 +334,8 @@ UIWindow
     anchors.top: prev.bottom
     anchors.left: prev.left
     margin-top: 10
-    text: Ids Use:
+    text: IDS USE:
+    font: verdana-9px-italic
 
   BotContainer
     id: useIds
@@ -342,7 +351,8 @@ UIWindow
     anchors.top: prev.bottom
     anchors.left: prev.left
     margin-top: 10
-    text: Ids Escadas:
+    text: IDS ESCADA:
+    font: verdana-9px-italic
 
   BotContainer
     id: stairIds
@@ -358,7 +368,8 @@ UIWindow
     anchors.top: prev.bottom
     anchors.left: prev.left
     margin-top: 10
-    text: Ids Buracos & Teleports:
+    text: IDS BURACOS & TELEPORTS:
+    font: verdana-9px-italic
 
   BotContainer
     id: buracoIds
