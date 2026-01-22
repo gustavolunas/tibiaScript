@@ -4,7 +4,8 @@ local macros = {
   "attackBot",
   "healing",
   "conditions",
-  "follow"
+  "follow",
+  "swap"
 }
 
 for _, file in ipairs(macros) do
