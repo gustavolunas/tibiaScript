@@ -2059,7 +2059,7 @@ macro(100, function()
             local manaOk = true
             if action.type == "spell" then
                 local needMana = tonumber(action.mana) or 0
-                if player:getMana() < needMana then manaOk = false end
+                if mana() < needMana then manaOk = false end
             end
 
             local mobsOk = true
