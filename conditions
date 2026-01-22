@@ -653,12 +653,12 @@ local familiarSpellByVoc = {
   knight   = "utevo gran res eq",
   paladin = "utevo gran res sac",
   sorcerer= "utevo gran res ven",
-  druid   = " utevo gran res dru",
+  druid   = "utevo gran res dru",
   monk    = "utevo gran res tio"
 }
 
 local lastSummon = 0
-local summonCooldown = 1 * 60 * 1000
+local summonCooldown = 10 * 1000
 
 macro(500, function()
   if not storage["conditionsButton"] or not storage["conditionsButton"].enabled then return end
