@@ -1,10 +1,10 @@
-local switchHealing = "healingButton"
+local switchSwap = "swapButton"
 
-if not storage[switchHealing] then
-    storage[switchHealing] = { enabled = false }
+if not storage[switchSwap] then
+    storage[switchSwap] = { enabled = false }
 end
 
-local healingButton = setupUI([[
+local swapButton = setupUI([[
 Panel
   height: 20
   margin-top: -3
@@ -15,7 +15,7 @@ Panel
     anchors.left: parent.left
     text-align: center
     width: 110
-    text: Healing
+    text: Swap
     font: verdana-9px
     color: white
     image-source: /images/ui/button_rounded
@@ -34,152 +34,19 @@ Panel
     font: verdana-9px
     image-source: /images/ui/button_rounded
 ]])
-healingButton:setId(switchHealing)
-healingButton.title:setOn(storage[switchHealing].enabled)
+swapButton:setId(switchSwap)
+swapButton.title:setOn(storage[switchSwap].enabled)
 
-healingButton.title.onClick = function(widget)
+swapButton.title.onClick = function(widget)
     local newState = not widget:isOn()
     widget:setOn(newState)
-    storage[switchHealing].enabled = newState
+    storage[switchSwap].enabled = newState
 end
 
-local mainPanel = setupUI([[  
-SpellRow < Panel
-  height: 25
-  margin-top: 3
-
-  ComboBox
-    id: spell
-    anchors.left: parent.left
-    anchors.verticalCenter: parent.verticalCenter
-    margin-left: 0
-    width: 120
-    font: verdana-11px-rounded
-    text-align: center
-    image-color: #828282
-
-  Label
-    id: lblHp
-    anchors.left: spell.right
-    anchors.verticalCenter: parent.verticalCenter
-    margin-left: 8
-    text-auto-resize: true
-    text: HP% <=
-    font: verdana-11px-rounded
-    width: 30
-
-  SpinBox
-    id: hp
-    anchors.left: lblHp.right
-    anchors.verticalCenter: parent.verticalCenter
-    width: 60
-    margin-left: 3
-    minimum: 0
-    maximum: 100
-    step: 1
-    text-align: center
-    focusable: true
-    editable: true
-    image-color: #828282
-
-  Label
-    id: lblMana
-    anchors.left: hp.right
-    anchors.verticalCenter: parent.verticalCenter
-    margin-left: 10
-    text: MP% <= 
-    text-auto-resize: true  
-    font: verdana-11px-rounded
-    width: 35
-
-  SpinBox
-    id: mana
-    anchors.left: lblMana.right
-    anchors.verticalCenter: parent.verticalCenter
-    width: 60
-    margin-left: 5
-    minimum: 0
-    maximum: 1000
-    step: 1
-    text-align: center
-    editable: true
-    image-color: #828282
-
-BotHealingPot < Panel
-  height: 32
-  margin-top: 3
-
-  BotItem
-    id: potionHp
-    anchors.left: parent.left
-    anchors.top: parent.top
-    margin-top: 0
-    border: 1 #8B0000
-    opacity: 0.80
-
-  Button
-    id: resourceText
-    anchors.top: potionHp.top
-    anchors.left: potionHp.right
-    anchors.right: parent.right
-    margin-left: 5
-    margin-right: 5
-    text-align: center
-    font: verdana-11px-rounded
-    image-source: /images/ui/button_rounded
-    image-color: 	#EE0000
-    height: 18
-
-  HorizontalScrollBar
-    id: scrollMin
-    anchors.left: resourceText.left
-    anchors.top: resourceText.bottom
-    anchors.right: resourceText.right
-    margin-top: 3
-    margin-right: 2
-    minimum: 0
-    maximum: 100
-    step: 1
-
-BotHealingPotMP < Panel
-  height: 32
-  margin-top: 3
-
-  BotItem
-    id: potionHp
-    anchors.left: parent.left
-    anchors.top: parent.top
-    margin-top: 0
-    border: 1 #00B2EE
-    opacity: 0.80
-
-  Button
-    id: resourceText
-    anchors.top: potionHp.top
-    anchors.left: potionHp.right
-    anchors.right: parent.right
-    margin-left: 5
-    margin-right: 5
-    font: verdana-11px-rounded
-    text-align: center
-    image-source: /images/ui/button_rounded
-    image-color: 	#00B2EE
-    height: 18
-
-  HorizontalScrollBar
-    id: scrollMax
-    anchors.left: resourceText.left
-    anchors.right: resourceText.right
-    anchors.top: resourceText.bottom
-    margin-top: 3
-    margin-left: 2
-    minimum: 0
-    maximum: 100
-    step: 1
-
+panelSwap = setupUI([[  
 UIWindow
-  id: mainPanel
-  size: 400 390
+  id: panelSwap
+  size: 400 280
   border: 1 black
   anchors.centerIn: parent
   margin-top: -60
@@ -232,674 +99,767 @@ UIWindow
       opacity: 0.80
 
   FlatPanel
-    id: panelMain
+    id: abaSinglexArea
     anchors.top: prev.bottom
-    anchors.right: parent.right
     anchors.left: parent.left
     margin-top: 18
-    margin-right: 8
-    margin-left: 8
-    height: 120
-    image-color: #363636
-    layout: verticalBox
-
-  Label
-    id: labelHealing
-    anchors.top: prev.top
-    anchors.left: panelMain.left
-    text: HEALING SPELLS:
-    text-auto-resize: true
-    font: verdana-9px-italic
-    margin-top: -5
-    margin-left: 10
-
-  BotSwitch
-    id: offHealing
-    anchors.top: prev.top
-    anchors.left: prev.right
-    image-souce: /images/ui/button_rounded
-    image-color: #363636
     margin-left: 5
-    margin-top: -3
-    width: 60
-    $!on
-      opacity: 0.70
-      image-color: #363636
-      text: OFFLINE
-      color: red
-    $on:
-      opacity: 1.00
-      color: #7CFC00
-      text: ONLINE
-      image-color: #363636
-
-  SpellRow
-    id: rowSpell1
-    anchors.top: labelHealing.bottom
-    anchors.left: panelMain.left
-    anchors.right: panelMain.right
-    margin-left: 10
-    margin-top: 10
-
-  SpellRow
-    id: rowSpell2
-    anchors.top: rowSpell1.bottom
-    anchors.left: rowSpell1.left
-    anchors.right: rowSpell1.right
-    margin-top: 10
-
-  SpellRow
-    id: rowSpell3
-    anchors.top: rowSpell2.bottom
-    anchors.left: rowSpell2.left
-    anchors.right: rowSpell2.right
-    margin-top: 10
-
-  FlatPanel
-    id: panelPotion
-    anchors.top: prev.bottom
-    anchors.right: parent.right
-    anchors.left: parent.left
-    margin-top: 25
-    margin-right: 8
-    margin-left: 8
-    height: 145
-    image-color: #363636
-    layout: verticalBox
-
-  Label
-    id: labelPotion
-    anchors.top: prev.top
-    anchors.left: panelPotion.left
-    text: POTIONS HEALTH/MANA:
-    text-auto-resize: true
-    font: verdana-9px-italic
-    margin-top: -5
-    margin-left: 10
-
-  BotSwitch
-    id: offPotions
-    anchors.top: prev.top
-    anchors.left: prev.right
-    image-souce: /images/ui/button_rounded
-    image-color: #363636
-    margin-left: 5
-    margin-top: -3
-    width: 60
-    $!on
-      opacity: 0.70
-      image-color: #363636
-      text: OFFLINE
-      color: red
-    $on:
-      opacity: 1.00
-      color: #7CFC00
-      text: ONLINE
-      image-color: #363636
-
-  BotHealingPot
-    id: rowPotionhp1
-    anchors.top: labelPotion.bottom
-    anchors.left: labelPotion.left
-    width: 180
-    margin-top: 10
-
-  BotHealingPot
-    id: rowPotionhp2
-    anchors.top: rowPotionhp1.bottom
-    anchors.left: rowPotionhp1.left
-    width: 180
-    margin-top: 10
-
-  BotHealingPot
-    id: rowPotionhp3
-    anchors.top: rowPotionhp2.bottom
-    anchors.left: rowPotionhp2.left
-    width: 180
-    margin-top: 10
-
-  BotHealingPotMP
-    id: rowPotionMp1
-    anchors.top: labelPotion.bottom
-    anchors.left: rowPotionhp1.right
-    width: 180
-    margin-top: 10
-    margin-left: 10
-
-  BotHealingPotMP
-    id: rowPotionMp2
-    anchors.top: rowPotionMp1.bottom
-    anchors.left: rowPotionMp1.left
-    width: 180
-    margin-top: 10
-
-  BotHealingPotMP
-    id: rowPotionMp3
-    anchors.top: rowPotionMp2.bottom
-    anchors.left: rowPotionMp2.left
-    width: 180
-    margin-top: 10
-
-  FlatPanel
-    id: panelFood
-    anchors.top: prev.bottom
-    anchors.right: parent.right
-    anchors.left: parent.left
-    margin-top: 25
-    margin-right: 8
-    margin-left: 8
     height: 55
+    width: 190
     image-color: #363636
     layout: verticalBox
 
   Label
-    id: labelFood
-    anchors.top: prev.top
-    anchors.left: panelFood.left
-    text: AUTO FOOD:
-    text-auto-resize: true
+    id: labelSinglexArea
+    anchors.verticalCenter: abaSinglexArea.top
+    anchors.left: abaSinglexArea.left
+    margin-left: 5
+    width: 200
+    text: SWAP SINGLE X AREA:
     font: verdana-9px-italic
-    margin-top: -5
-    margin-left: 10
 
-  BotSwitch
-    id: offFood
+  BotItem
+    id: idArmaSingle
+    anchors.top: labelSinglexArea.bottom
+    anchors.left: prev.left
+    margin-top: 5
+    image-source: /images/ui/item-blessed
+
+  BotItem
+    id: idArmaArea
     anchors.top: prev.top
     anchors.left: prev.right
-    image-souce: /images/ui/button_rounded
-    image-color: #363636
     margin-left: 5
-    margin-top: -3
-    width: 60
-    $!on
-      opacity: 0.70
-      image-color: #363636
-      text: OFFLINE
-      color: red
-    $on:
-      opacity: 1.00
-      color: #7CFC00
-      text: ONLINE
-      image-color: #363636
+    image-source: /images/ui/item-blessed
 
-  Panel
-    id: foodContainerPanel
-    anchors.top: labelFood.bottom
-    anchors.left: panelFood.left
-    anchors.right: panelFood.right
-    size: 270 35
+  BotSwitch
+    id: labelSwapArma
+    anchors.top: prev.top
+    anchors.left: prev.right
+    anchors.right: abaSinglexArea.right
+    margin-left: 5
+    margin-right: 3
+    font: verdana-9px
+    height: 18
+    color: white
+    image-source: /images/ui/button_rounded
+    $on:
+      font: verdana-9px
+      color: green
+
+  HorizontalScrollBar
+    id: QntdMob
+    anchors.left: prev.left
+    anchors.top: prev.bottom
+    anchors.right: prev.right
+    margin-top: 3
+    width: 85
+    minimum: 0
+    maximum: 10
+    step: 1
+
+  FlatPanel
+    id: abaSwapManaLeech
+    anchors.top: abaSinglexArea.bottom
+    anchors.left: parent.left
+    margin-top: 10
+    margin-left: 5
+    height: 165
+    width: 190
+    image-color: #363636
+    layout: verticalBox
+
+  Label
+    id: labelSwapManaLeech
+    anchors.verticalCenter: abaSwapManaLeech.top
+    anchors.left: abaSwapManaLeech.left
+    margin-left: 5
+    width: 200
+    text: SWAP MANA LEECH:
+    font: verdana-9px-italic
+
+  Label
+    id: labelArma
+    anchors.top: labelSwapManaLeech.bottom
+    anchors.left: abaSwapManaLeech.left
+    anchors.right: abaSwapManaLeech.right
+    text: WEAPON / WEAPON LEECH
+    text-align: center
+    margin-top: 7
+    color: yellow
+    font: cipsoftFont
+
+  BotItem
+    id: idArmaNormal
+    anchors.top: labelArma.bottom
+    anchors.left: prev.left
+    image-source: /images/ui/item-blessed
     margin-top: 5
     margin-left: 5
-    margin-right: 5
+
+  BotItem
+    id: idArmaLeech
+    anchors.top: prev.top
+    anchors.left: prev.right
+    margin-left: 5
+    image-source: /images/ui/item-blessed
+
+  BotSwitch
+    id: labelManaArmaLeech
+    anchors.top: prev.top
+    anchors.left: prev.right
+    anchors.right: abaSwapManaLeech.right
+    margin-left: 5
+    margin-right: 3
+    font: verdana-9px
+    height: 18
+    color: white
+    image-source: /images/ui/button_rounded
+    $on:
+      font: verdana-9px
+      color: green
+
+  HorizontalScrollBar
+    id: manaArmaLeech
+    anchors.left: prev.left
+    anchors.top: prev.bottom
+    anchors.right: prev.right
+    margin-top: 3
+    width: 85
+    minimum: 0
+    maximum: 100
+    step: 1
+  
+  Label
+    id: labelArma
+    anchors.top: idArmaNormal.bottom
+    anchors.left: abaSwapManaLeech.left
+    anchors.right: abaSwapManaLeech.right
+    text: HELMET / HELMET LEECH
+    text-align: center
+    margin-top: 15
+    color: yellow
+    font: cipsoftFont
+
+  BotItem
+    id: idHelmetNormal
+    anchors.top: prev.bottom
+    anchors.left: idArmaNormal.left
+    image-source: /images/ui/item-blessed
+    margin-top: 5
+    margin-left: 5
+
+  BotItem
+    id: idHelmetLeech
+    anchors.top: prev.top
+    anchors.left: prev.right
+    margin-left: 5
+    image-source: /images/ui/item-blessed
+
+  BotSwitch
+    id: labelManaHelmetLeech
+    anchors.top: prev.top
+    anchors.left: prev.right
+    anchors.right: abaSwapManaLeech.right
+    margin-left: 5
+    margin-right: 3
+    font: verdana-9px
+    height: 18
+    color: white
+    image-source: /images/ui/button_rounded
+    $on:
+      font: verdana-9px
+      color: green
+
+  HorizontalScrollBar
+    id: manaHelmetLeech
+    anchors.left: prev.left
+    anchors.top: prev.bottom
+    anchors.right: prev.right
+    margin-top: 3
+    width: 85
+    minimum: 0
+    maximum: 100
+    step: 1
+
+  FlatPanel
+    id: abaRingAmulet
+    anchors.top: abaSinglexArea.top
+    anchors.bottom: abaSwapManaLeech.bottom
+    anchors.left: abaSwapManaLeech.right
+    margin-top: 0
+    margin-left: 10
+    margin-right: 0
+    height: 55
+    width: 190
+    image-color: #363636
+    layout: verticalBox
+
+  Label
+    id: labelRingAmulet
+    anchors.verticalCenter: abaRingAmulet.top
+    anchors.left: abaRingAmulet.left
+    margin-left: 5
+    width: 200
+    text: SWAP RING & AMULET:
+    font: verdana-9px-italic
+
+  BotItem
+    id: idRing1
+    anchors.top: labelRingAmulet.bottom
+    anchors.left: prev.left
+    image-source: /images/ui/item-blessed
+    margin-top: 5
+
+  BotItem
+    id: idEnergyRing
+    anchors.top: prev.top
+    anchors.left: prev.right
+    margin-left: 5
+    image-source: /images/ui/item-blessed
+
+  HorizontalScrollBar
+    id: equipEnergy
+    anchors.left: idEnergyRing.right
+    anchors.top: prev.top
+    anchors.right: abaRingAmulet.right
+    margin-right: 3
+    margin-left: 5
+    width: 85
+    minimum: 0
+    maximum: 100
+    step: 1
+
+  HorizontalScrollBar
+    id: desequipEnergy
+    anchors.left: equipEnergy.left
+    anchors.top: equipEnergy.bottom
+    anchors.right: equipEnergy.right
+    margin-top: 8
+    width: 85
+    minimum: 0
+    maximum: 100
+    step: 1
+
+  BotSwitch
+    id: labelEnergyRing
+    anchors.left: idRing1.left
+    anchors.right: desequipEnergy.right
+    anchors.top: prev.bottom
+    margin-top: 5
+    font: verdana-9px
+    height: 18
+    color: white
+    image-source: /images/ui/button_rounded
+    $on:
+      font: verdana-9px
+      color: green
+
+  BotItem
+    id: idRing2
+    anchors.top: labelEnergyRing.bottom
+    anchors.left: idRing1.left
+    image-source: /images/ui/item-blessed
+    margin-top: 18
+
+  BotItem
+    id: idMightRing
+    anchors.top: prev.top
+    anchors.left: prev.right
+    margin-left: 5
+    image-source: /images/ui/item-blessed
+
+  HorizontalScrollBar
+    id: equipMight
+    anchors.left: idMightRing.right
+    anchors.top: prev.top
+    anchors.right: abaRingAmulet.right
+    margin-right: 3
+    margin-left: 5
+    width: 85
+    minimum: 0
+    maximum: 100
+    step: 1
+
+  HorizontalScrollBar
+    id: desequipMight
+    anchors.left: equipMight.left
+    anchors.top: equipMight.bottom
+    anchors.right: equipMight.right
+    margin-top: 8
+    width: 85
+    minimum: 0
+    maximum: 100
+    step: 1
+
+  BotSwitch
+    id: labelMightRing
+    anchors.left: idRing2.left
+    anchors.right: desequipEnergy.right
+    anchors.top: prev.bottom
+    margin-top: 5
+    font: verdana-9px
+    height: 18
+    color: white
+    image-source: /images/ui/button_rounded
+    $on:
+      font: verdana-9px
+      color: green
+
+  BotItem
+    id: idAmulet1
+    anchors.top: labelMightRing.bottom
+    anchors.left: idRing1.left
+    image-source: /images/ui/item-blessed
+    margin-top: 18  
+
+  BotItem
+    id: idSSA
+    anchors.top: prev.top
+    anchors.left: prev.right
+    margin-left: 5
+    image-source: /images/ui/item-blessed
+
+  HorizontalScrollBar
+    id: equipSSA
+    anchors.left: idSSA.right
+    anchors.top: prev.top
+    anchors.right: abaRingAmulet.right
+    margin-right: 3
+    margin-left: 5
+    width: 85
+    minimum: 0
+    maximum: 100
+    step: 1
+
+  HorizontalScrollBar
+    id: desequipSSA
+    anchors.left: equipSSA.left
+    anchors.top: equipSSA.bottom
+    anchors.right: equipSSA.right
+    margin-top: 8
+    width: 85
+    minimum: 0
+    maximum: 100
+    step: 1
+
+  BotSwitch
+    id: labelSSA
+    anchors.left: idAmulet1.left
+    anchors.right: desequipSSA.right
+    anchors.top: prev.bottom
+    margin-top: 5
+    font: verdana-9px
+    height: 18
+    color: white
+    image-source: /images/ui/button_rounded
+    $on:
+      font: verdana-9px
+      color: green
 
 ]], g_ui.getRootWidget())
-mainPanel:hide()
+panelSwap:hide()
 
-mainPanel.closePanel.onClick = function()
-  mainPanel:hide()
+local function makeScrollTextLabel(scroll)
+  local lb = g_ui.createWidget('Label', scroll)
+  lb:setId("txtOverlay")
+  lb:setText("")
+  lb:setTextAlign(AlignCenter)
+  lb:setFont("verdana-9px")
+  lb:setColor("white")
+  lb:setPhantom(true) -- deixa clicar/arrastar na scrollbar mesmo com label em cima
+  lb:fill("parent")
+  return lb
 end
 
-if type(storage.foodItems) ~= "table" then
-  storage.foodItems = { 3607, 3585, 3592, 3600, 3601 }
+swapButton.settings.onClick = function()
+  panelSwap:setVisible(not panelSwap:isVisible())
 end
-local destPanel = mainPanel.foodContainerPanel
-local foodContainer = UI.Container(function(widget, items)
-  storage.foodItems = items
-end, true)
 
-foodContainer:setParent(destPanel)
-foodContainer:fill('parent')
-foodContainer:setOpacity(0.70)
-foodContainer:setImageColor("#363636")
-foodContainer:setItems(storage.foodItems)
+panelSwap.closePanel.onClick = function()
+  panelSwap:hide()
+end
 
-macro(500, function()
-  -- segurança básica
-  if not player then return end
+local panelSoftBoots = "config_swapping_v5"
 
-  -- condição 1: auto food ONLINE
-  if not storage.lnsHealingPanel
-     or not storage.lnsHealingPanel.toggles
-     or storage.lnsHealingPanel.toggles.offFood ~= true then
-    return
-  end
+local itemsToSave = {
+  "idBoots1", "idBoots2",
+  "idArmaSingle", "idArmaArea",
+  "idArmaNormal", "idArmaLeech",
+  "idHelmetNormal", "idHelmetLeech",
+  "idRing1", "idEnergyRing",
+  "idRing2", "idMightRing",
+  "idAmulet1", "idSSA"
+}
 
-  -- condição 2: healingButton enabled
-  if not storage[switchHealing]
-     or storage[switchHealing].enabled ~= true then
-    return
-  end
-
-  -- sem comida configurada
-  if type(storage.foodItems) ~= "table" or not storage.foodItems[1] then
-    return
-  end
-
-  -- ainda com buff de food ativo
-  if player:getRegenerationTime() > 400 then return end
-
-  -- procura comida nos containers
-  for _, container in pairs(g_game.getContainers()) do
-    local items = container:getItems()
-    if items then
-      for _, item in ipairs(items) do
-        for _, foodItem in ipairs(storage.foodItems) do
-          if item:getId() == foodItem.id then
-            g_game.use(item)
-            return
-          end
+for _, id in ipairs(itemsToSave) do
+    local widget = panelSwap[id]
+    if widget then
+        if storage[panelSoftBoots .. id] then
+            widget:setItemId(storage[panelSoftBoots .. id])
         end
-      end
+        widget.onItemChange = function(w)
+            storage[panelSoftBoots .. id] = w:getItemId()
+        end
+    end
+end
+
+local switchesToSave = {
+  "labelBootsMP", 
+  "labelSwapArma",
+  "labelManaArmaLeech",
+  "labelManaHelmetLeech",
+  "labelEnergyRing",
+  "labelMightRing",
+  "labelSSA"
+}
+
+for _, id in ipairs(switchesToSave) do
+    local widget = panelSwap[id]
+    if widget then
+        if storage[panelSoftBoots .. id] ~= nil then
+            widget:setOn(storage[panelSoftBoots .. id])
+        end
+        widget.onClick = function(w)
+            w:setOn(not w:isOn())
+            storage[panelSoftBoots .. id] = w:isOn()
+        end
+    end
+end
+
+local simpleScrolls = {
+    {id="menorMPBoots", link="labelBootsMP", txt="MP < ", suf="%", default=75},
+    {id="QntdMob", link="labelSwapArma", txt="Mobs >= ", suf="", default=3},
+    {id="manaArmaLeech", link="labelManaArmaLeech", txt="Mana < ", suf="%", default=80},
+    {id="manaHelmetLeech", link="labelManaHelmetLeech", txt="Mana < ", suf="%", default=60}
+}
+
+for _, config in ipairs(simpleScrolls) do
+    local widget = panelSwap[config.id]
+    local linkedSwitch = panelSwap[config.link]
+    
+    if widget and linkedSwitch then
+        local savedValue = storage[panelSoftBoots .. config.id]
+        if savedValue then
+            widget:setValue(savedValue)
+        else
+            widget:setValue(config.default or 0)
+        end
+        
+        local function updateSimpleText(val)
+            linkedSwitch:setText(config.txt .. val .. config.suf)
+        end
+
+        updateSimpleText(widget:getValue())
+        
+        widget.onValueChange = function(w, value)
+            storage[panelSoftBoots .. config.id] = value
+            updateSimpleText(value)
+        end
+    end
+end
+
+local dualScrolls = {
+    {
+        switch="labelEnergyRing", 
+        equipScroll="equipEnergy", 
+        unequipScroll="desequipEnergy",
+        defaultEq=70, 
+        defaultUn=90,
+        name="[Energy Ring]"
+    },
+    {
+        switch="labelMightRing", 
+        equipScroll="equipMight", 
+        unequipScroll="desequipMight",
+        defaultEq=70, 
+        defaultUn=90,
+        name="[Might Ring]"
+    },
+    {
+        switch="labelSSA", 
+        equipScroll="equipSSA", 
+        unequipScroll="desequipSSA",
+        defaultEq=70, 
+        defaultUn=90,
+        name="[SSA]"
+    }
+}
+
+for _, group in ipairs(dualScrolls) do
+  local swWidget = panelSwap[group.switch]
+  local eqWidget = panelSwap[group.equipScroll]
+  local unWidget = panelSwap[group.unequipScroll]
+
+  if swWidget and eqWidget and unWidget then
+    local savedEq = storage[panelSoftBoots .. group.equipScroll]
+    local savedUn = storage[panelSoftBoots .. group.unequipScroll]
+
+    eqWidget:setValue(savedEq or group.defaultEq)
+    unWidget:setValue(savedUn or group.defaultUn)
+
+    local eqLabel = eqWidget:recursiveGetChildById("txtOverlay") or makeScrollTextLabel(eqWidget)
+    local unLabel = unWidget:recursiveGetChildById("txtOverlay") or makeScrollTextLabel(unWidget)
+
+    local function updateDualText()
+      local eqVal = eqWidget:getValue()
+      local unVal = unWidget:getValue()
+
+      -- BotSwitch vira só um "toggle", sem texto variável
+      swWidget:setText(group.name)
+
+      -- Texto aparece nas scrolls
+      eqLabel:setText("            Eq: " .. eqVal .. "%")
+      eqLabel:setFont("verdana-9px-italic")
+      eqLabel:setColor("green")
+      unLabel:setText("            Un: " .. unVal .. "%")
+      unLabel:setFont("verdana-9px-italic")
+      unLabel:setColor("yellow")
+    end
+
+    updateDualText()
+
+    eqWidget.onValueChange = function(_, value)
+      storage[panelSoftBoots .. group.equipScroll] = value
+      updateDualText()
+    end
+
+    unWidget.onValueChange = function(_, value)
+      storage[panelSoftBoots .. group.unequipScroll] = value
+      updateDualText()
     end
   end
+end
+
+macro(200, function()
+  if not storage[switchSwap] or storage[switchSwap].enabled ~= true then return end
+    if not storage[panelSoftBoots .. "labelSwapArma"] then 
+        return 
+    end
+
+    local idSingle = storage[panelSoftBoots .. "idArmaSingle"]
+    local idArea   = storage[panelSoftBoots .. "idArmaArea"]
+    local limitMob = storage[panelSoftBoots .. "QntdMob"] or 3
+    local idLeech  = storage[panelSoftBoots .. "idArmaLeech"]
+    local weaponSlot = player:getInventoryItem(InventorySlotLeft)
+    local currentWeapon = weaponSlot and weaponSlot:getId() or 0
+
+    if not idSingle or idSingle <= 100 or not idArea or idArea <= 100 then return end
+
+    if storage[panelSoftBoots .. "labelManaArmaLeech"] then
+        local manaLimit = storage[panelSoftBoots .. "manaArmaLeech"] or 80
+        if manapercent() < manaLimit then
+        end
+    end
+
+    local whitelistMonsters = {"Emberwing", "Skullfrost", "Groovebeast", "Thundergiant"}
+    
+    local specAmount = 0
+    local playerPos = player:getPosition()
+
+    for _, mob in ipairs(getSpectators()) do
+        if mob:isMonster() and not mob:isPlayer() and getDistanceBetween(playerPos, mob:getPosition()) <= 5 then
+            if not table.find(whitelistMonsters, mob:getName()) then
+                specAmount = specAmount + 1
+            end
+        end
+    end
+
+    if g_game.isAttacking() then
+        if currentWeapon == idLeech and storage[panelSoftBoots .. "labelManaArmaLeech"] then return end
+
+        if specAmount >= limitMob then
+            if currentWeapon ~= idArea then
+                g_game.equipItemId(idArea)
+            end
+        else
+            if currentWeapon ~= idSingle then
+                g_game.equipItemId(idSingle)
+            end
+        end
+    end
 end)
 
+macro(200, function()
+  if not storage[switchSwap] or storage[switchSwap].enabled ~= true then return end
+    local isAttacking = g_game.isAttacking()
+    local manaPct = manapercent()
 
-healingButton.settings.onClick = function()
-    if not mainPanel:isVisible() then
-        mainPanel:show()
-        mainPanel:raise()
-        mainPanel:focus()
+    if storage[panelSoftBoots .. "labelManaArmaLeech"] then
+        local idNormal = storage[panelSoftBoots .. "idArmaNormal"]
+        local idLeech  = storage[panelSoftBoots .. "idArmaLeech"]
+        local limit    = storage[panelSoftBoots .. "manaArmaLeech"] or 80
+
+        if idNormal and idNormal > 100 and idLeech and idLeech > 100 then
+            local leftSlot = player:getInventoryItem(InventorySlotLeft)
+            local currentId = leftSlot and leftSlot:getId() or 0
+
+            if not isAttacking then
+                if currentId ~= idNormal then
+                    g_game.equipItemId(idNormal)
+                end
+            else
+                if manaPct < limit then
+                    if currentId ~= idLeech then g_game.equipItemId(idLeech) end
+                else
+                    if currentId ~= idNormal then g_game.equipItemId(idNormal) end
+                end
+            end
+        end
     end
-end
 
-local panelName = "lnsHealingPanel"
+    if storage[panelSoftBoots .. "labelManaHelmetLeech"] then
+        local idNormal = storage[panelSoftBoots .. "idHelmetNormal"]
+        local idLeech  = storage[panelSoftBoots .. "idHelmetLeech"]
+        local limit    = storage[panelSoftBoots .. "manaHelmetLeech"] or 60
 
--- Spells padronizadas (como você pediu)
-local SPELL_OPTIONS = {
-  "", -- vazio = desativado
-  "Exura",
-  "Exura Gran",
-  "Exura Vita",
-  "Exura San",
-  "Exura Gran San",
-  "Exura Ico",
-  "Exura Med Ico",
-  "Exura Gran Ico"
-}
+        if idNormal and idNormal > 100 and idLeech and idLeech > 100 then
+            local headSlot = player:getInventoryItem(InventorySlotHead)
+            local currentId = headSlot and headSlot:getId() or 0
 
--- "Amarração" da mana por spell (mana mínima necessária pra castar)
--- (valores padrão mais comuns; você pode ajustar se seu servidor for diferente)
-local SPELL_MANA_COST = {
-  ["Exura"] = 20,
-  ["Exura Gran"] = 70,
-  ["Exura Vita"] = 160,
-  ["Exura San"] = 160,
-  ["Exura Gran San"] = 210,
-  ["Exura Ico"] = 40,
-  ["Exura Med Ico"] = 90,
-  ["Exura Gran Ico"] = 200
-}
-
--- Defaults (se não existir no storage)
-local DEFAULT_ROWS = {
-  { spell = "Exura",          hp = 90, mana = 20  },
-  { spell = "Exura Gran",     hp = 70, mana = 70  },
-  { spell = "Exura Vita",     hp = 50, mana = 160 }
-}
-
-local function ensureStorage()
-  if not storage[panelName] or type(storage[panelName]) ~= "table" then
-    storage[panelName] = {}
-  end
-  if type(storage[panelName].rows) ~= "table" then
-    storage[panelName].rows = {}
-  end
-
-  for i = 1, 3 do
-    if type(storage[panelName].rows[i]) ~= "table" then
-      storage[panelName].rows[i] = {
-        spell = DEFAULT_ROWS[i].spell,
-        hp = DEFAULT_ROWS[i].hp,
-        mana = DEFAULT_ROWS[i].mana
-      }
+            if not isAttacking then
+                if currentId ~= idNormal then
+                    g_game.equipItemId(idNormal)
+                end
+            else
+                if manaPct < limit then
+                    if currentId ~= idLeech then g_game.equipItemId(idLeech) end
+                else
+                    if currentId ~= idNormal then g_game.equipItemId(idNormal) end
+                end
+            end
+        end
     end
-    if storage[panelName].rows[i].hp == nil then storage[panelName].rows[i].hp = DEFAULT_ROWS[i].hp end
-    if storage[panelName].rows[i].mana == nil then storage[panelName].rows[i].mana = DEFAULT_ROWS[i].mana end
-    if storage[panelName].rows[i].spell == nil then storage[panelName].rows[i].spell = DEFAULT_ROWS[i].spell end
-  end
-end
-
-local function comboSelectByText(combo, text)
-  if not combo then return end
-  text = tostring(text or ""):lower()
-
-  local idx = 1
-  for i, s in ipairs(SPELL_OPTIONS) do
-    if tostring(s):lower() == text then
-      idx = i
-      break
-    end
-  end
-
-  -- tenta por índice
-  if combo.setCurrentIndex then
-    combo:setCurrentIndex(idx)
-    return
-  end
-
-  -- fallback (algumas versões usam setCurrentOption)
-  if combo.setCurrentOption then
-    combo:setCurrentOption(SPELL_OPTIONS[idx])
-    return
-  end
-end
-
-
-local function fillComboOptions(combo)
-  combo:clearOptions()
-  for _, s in ipairs(SPELL_OPTIONS) do
-    combo:addOption(s)
-  end
-end
-
-local function bindSpellRow(rowWidget, rowIndex)
-  if not rowWidget then return end
-
-  local combo = rowWidget.spell
-  local hpBox = rowWidget.hp
-  local manaBox = rowWidget.mana
-
-  -- popula combobox
-  fillComboOptions(combo)
-
-  -- aplica valores do storage na UI
-  local rowStore = storage[panelName].rows[rowIndex]
-  comboSelectByText(combo, rowStore.spell)
-  hpBox:setValue(tonumber(rowStore.hp) or 0)
-  manaBox:setValue(tonumber(rowStore.mana) or 0)
-
-  -- eventos: salvar quando mexer
-  combo.onOptionChange = function(widget)
-    local chosen = widget:getCurrentOption().text or ""
-    rowStore.spell = chosen
-
-    local cost = SPELL_MANA_COST[chosen]
-    if cost then
-      local cur = tonumber(manaBox:getValue()) or 0
-      if cur < cost or cur > cost then
-        manaBox:setValue(cost)
-        rowStore.mana = cost
-      end
-    end
-  end
-
-  hpBox.onValueChange = function(widget, value)
-    rowStore.hp = tonumber(value) or 0
-  end
-
-  manaBox.onValueChange = function(widget, value)
-    rowStore.mana = tonumber(value) or 0
-  end
-end
-
--- init
-ensureStorage()
-
--- bind 3 rows
-bindSpellRow(mainPanel.rowSpell1, 1)
-bindSpellRow(mainPanel.rowSpell2, 2)
-bindSpellRow(mainPanel.rowSpell3, 3)
-
--- =========================================
--- POTIONS STORAGE (HP/MP) - OTCv8 SAFE (BASEADO NA SUA BASE)
--- =========================================
-
-local panelName = "lnsHealingPanel" -- usa o mesmo se já existir
-
--- cria storage default
-if not storage[panelName] then storage[panelName] = {} end
-if not storage[panelName].potions then storage[panelName].potions = {} end
-if not storage[panelName].potions.hp then storage[panelName].potions.hp = {} end
-if not storage[panelName].potions.mp then storage[panelName].potions.mp = {} end
-
-for i = 1, 3 do
-  if not storage[panelName].potions.hp[i] then storage[panelName].potions.hp[i] = { id = 0, min = 50 } end
-  if not storage[panelName].potions.mp[i] then storage[panelName].potions.mp[i] = { id = 0, max = 70 } end
-
-  storage[panelName].potions.hp[i].id  = tonumber(storage[panelName].potions.hp[i].id) or 0
-  storage[panelName].potions.hp[i].min = tonumber(storage[panelName].potions.hp[i].min) or 50
-
-  storage[panelName].potions.mp[i].id  = tonumber(storage[panelName].potions.mp[i].id) or 0
-  storage[panelName].potions.mp[i].max = tonumber(storage[panelName].potions.mp[i].max) or 70
-end
-
-local function updatePotionTextSingle(widget, value, isMana)
-  value = tonumber(value) or 0
-  local labelType = isMana and "MP% <=" or "HP% <="
-  if widget and widget.resourceText then
-    widget.resourceText:setText(labelType .. " " .. value .. "%")
-  end
-end
-
-local function setupPotionEntrySingle(widget, data, isMana)
-  if not widget then return end
-  if not data then data = { id = 0, min = 0, max = 0 } end
-
-  local botItem = widget.potionHp
-  local slider  = isMana and widget.scrollMax or widget.scrollMin
-
-  -- aplica item e slider do storage
-  if botItem and botItem.setItemId then
-    botItem:setItemId(tonumber(data.id) or 0)
-  end
-
-  if slider and slider.setValue then
-    local v = isMana and (tonumber(data.max) or 0) or (tonumber(data.min) or 0)
-    slider:setValue(v)
-    updatePotionTextSingle(widget, v, isMana)
-  end
-
-  -- callback: quando trocar o item
-  if botItem and botItem.onItemChange then
-    botItem.onItemChange = function(w)
-      local item = w:getItem()
-      if item then
-        data.id = item:getId()
-      else
-        data.id = 0
-      end
-    end
-  end
-
-  -- callback: quando mexer no slider
-  if slider then
-  slider.onValueChange = function(s, v)
-    v = tonumber(v) or 0
-    if isMana then
-      data.max = v
-    else
-      data.min = v
-    end
-    updatePotionTextSingle(widget, v, isMana)
-    end
-  end
-end
-
--- binds HP (rowPotionhp1..3)
-setupPotionEntrySingle(mainPanel.rowPotionhp1, storage[panelName].potions.hp[1], false)
-setupPotionEntrySingle(mainPanel.rowPotionhp2, storage[panelName].potions.hp[2], false)
-setupPotionEntrySingle(mainPanel.rowPotionhp3, storage[panelName].potions.hp[3], false)
-
--- binds MP (rowPotionMp1..3)
-setupPotionEntrySingle(mainPanel.rowPotionMp1, storage[panelName].potions.mp[1], true)
-setupPotionEntrySingle(mainPanel.rowPotionMp2, storage[panelName].potions.mp[2], true)
-setupPotionEntrySingle(mainPanel.rowPotionMp3, storage[panelName].potions.mp[3], true)
-
-if not storage[panelName] then storage[panelName] = {} end
-if not storage[panelName].toggles then storage[panelName].toggles = {} end
-
-local function bindToggleSwitch(switchWidget, key, defaultValue)
-  if not switchWidget then return end
-
-  if storage[panelName].toggles[key] == nil then
-    storage[panelName].toggles[key] = (defaultValue == true)
-  end
-
-  -- aplica estado salvo
-  switchWidget:setOn(storage[panelName].toggles[key] == true)
-
-  -- salva ao clicar
-  switchWidget.onClick = function(widget)
-    local newState = not widget:isOn()
-    widget:setOn(newState)
-    storage[panelName].toggles[key] = newState
-  end
-end
-
-bindToggleSwitch(mainPanel.offHealing, "offHealing", true)
-bindToggleSwitch(mainPanel.offPotions, "offPotions", true)
-bindToggleSwitch(mainPanel.offFood,    "offFood",    true)
-
--- =========================================
--- MACRO: Healing Spells (prioriza mais forte, fallback por mana)
--- Requisitos:
---  - storage.lnsHealingPanel.toggles.offHealing == true
---  - storage[switchHealing].enabled == true
--- =========================================
-
-macro(100, function()
-  if not player then return end
-
-  -- Condição 1: switch do painel (ONLINE/OFFLINE)
-  if not storage.lnsHealingPanel
-     or not storage.lnsHealingPanel.toggles
-     or storage.lnsHealingPanel.toggles.offHealing ~= true then
-    return
-  end
-
-  -- Condição 2: healingButton enabled
-  if not storage[switchHealing]
-     or storage[switchHealing].enabled ~= true then
-    return
-  end
-
-  local cfg = storage.lnsHealingPanel
-  if not cfg.rows or type(cfg.rows) ~= "table" then return end
-
-  local hp = hppercent()
-  local mp = mana()
-
-  -- monta lista de spells "aplicáveis" (hp <= threshold e spell != "")
-  local candidates = {}
-
-  for i = 1, 3 do
-    local r = cfg.rows[i]
-    if r and type(r) == "table" then
-      local spell = tostring(r.spell or "")
-      local hpTh = tonumber(r.hp) or 0
-      local mpNeed = tonumber(r.mana) or 0
-
-      if spell ~= "" and hp <= hpTh then
-        -- custo real da spell (preferencial); fallback pro valor do row
-        local realCost = SPELL_MANA_COST[spell] or mpNeed
-        table.insert(candidates, {
-          spell = spell,
-          hpTh = hpTh,
-          cost = tonumber(realCost) or 0
-        })
-      end
-    end
-  end
-
-  if #candidates == 0 then return end
-
-  -- ordena para priorizar a mais forte:
-  -- quanto MENOR o hpTh, mais urgente/forte (ex: 50 é mais forte que 90)
-  table.sort(candidates, function(a, b)
-    return a.hpTh < b.hpTh
-  end)
-
-  -- tenta a melhor; se não tiver mana, faz fallback pras próximas
-  for _, c in ipairs(candidates) do
-    if mp >= (c.cost or 0) then
-      say(c.spell)
-      return
-    end
-  end
 end)
 
--- =========================================
--- MACRO: Potions HP/MP (SEM precisar backpack aberta)
--- Usa useWith(itemId, player) em vez de g_game.use(item)
--- Condições:
---  1) storage.lnsHealingPanel.toggles.offPotions == true
---  2) storage[switchHealing].enabled == true
--- =========================================
+macro(10, function()
+  if not storage[switchSwap] or storage[switchSwap].enabled ~= true then return end
 
-macro(150, function()
-  -- Condição 1: switch do painel (ONLINE/OFFLINE) das potions
-  if not storage.lnsHealingPanel
-     or not storage.lnsHealingPanel.toggles
-     or storage.lnsHealingPanel.toggles.offPotions ~= true then
-    return
-  end
+  if storage[panelSoftBoots .. "labelEnergyRing"] then
 
-  -- Condição 2: healingButton enabled
-  if not storage[switchHealing]
-     or storage[switchHealing].enabled ~= true then
-    return
-  end
+  local normalId  = storage[panelSoftBoots .. "idRing1"]
+  local specialId = storage[panelSoftBoots .. "idEnergyRing"]
+  local eq = storage[panelSoftBoots .. "equipEnergy"]
+  local un = storage[panelSoftBoots .. "desequipEnergy"]
 
-  local cfg = storage.lnsHealingPanel
-  if not cfg.potions then return end
+  if not eq or not un then return end
+  if not normalId or normalId <= 100 then return end
+  if not specialId or specialId <= 100 then return end
 
   local hp = hppercent()
   local mp = manapercent()
+  local us = getSlot(SlotFinger) -- ring atual
 
-  local me = g_game.getLocalPlayer()
-  if not me then return end
-
-  -- =========================
-  -- HP potions (min): usa se HP <= min
-  -- Prioriza menor min (mais urgente)
-  -- =========================
-  if cfg.potions.hp and type(cfg.potions.hp) == "table" then
-    local candidatesHP = {}
-    for i = 1, 3 do
-      local p = cfg.potions.hp[i]
-      if p and type(p) == "table" then
-        local id = tonumber(p.id) or 0
-        local min = tonumber(p.min) or 0
-        if id > 0 and hp <= min then
-          table.insert(candidatesHP, { id = id, th = min })
-        end
-      end
+  -- PZ: garante normal e sai
+  if isInPz and isInPz() then
+    if not us or us:getId() ~= normalId then
+      g_game.equipItemId(normalId)
     end
-
-    if #candidatesHP > 0 then
-      table.sort(candidatesHP, function(a, b) return a.th < b.th end)
-      for _, c in ipairs(candidatesHP) do
-        -- useWith não precisa de backpack aberta
-        useWith(c.id, me)
-        return
-      end
-    end
+    return
   end
 
-  -- =========================
-  -- MP potions (max): usa se MP <= max
-  -- Prioriza menor max (mais urgente)
-  -- =========================
-  if cfg.potions.mp and type(cfg.potions.mp) == "table" then
-    local candidatesMP = {}
-    for i = 1, 3 do
-      local p = cfg.potions.mp[i]
-      if p and type(p) == "table" then
-        local id = tonumber(p.id) or 0
-        local max = tonumber(p.max) or 0
-        if id > 0 and mp <= max then
-          table.insert(candidatesMP, { id = id, th = max })
-        end
-      end
+  -- ✅ se NÃO tiver ring equipado, equipa o normal e sai (igual SSA)
+  if not us then
+    g_game.equipItemId(normalId)
+    return
+  end
+
+
+  -- Equipar Energy (hp baixo + mana >= 15)
+  if (hp <= eq and mp >= 15) and (us and us:getId() ~= 3088) then
+    g_game.equipItemId(specialId)
+    return delay(300)
+
+  -- Voltar normal (hp alto OU mana <= 14)
+  elseif (hp >= un or mp <= 14) and (us and us:getId() ~= normalId)  then
+    g_game.equipItemId(normalId)
+    return delay(300)
+  end
+end
+end)
+
+macro(10, function()
+  if not storage[switchSwap] or storage[switchSwap].enabled ~= true then return end
+  if storage[panelSoftBoots .. "labelMightRing"] then
+  local normalId2 = storage[panelSoftBoots .. "idRing2"]
+  local mightId   = storage[panelSoftBoots .. "idMightRing"]
+  local eq2       = storage[panelSoftBoots .. "equipMight"]
+  local un2       = storage[panelSoftBoots .. "desequipMight"]
+
+  if not eq2 or not un2 then return end
+  if not normalId2 or normalId2 <= 100 then return end
+  if not mightId or mightId <= 100 then return end
+
+  local hp = hppercent()
+  local us3 = getSlot(SlotFinger)
+
+  if isInPz and isInPz() then
+    if not us3 or us3:getId() ~= normalId2 then
+      g_game.equipItemId(normalId2)
+    end
+    return
+  end
+
+  -- ✅ se NÃO tiver ring equipado, equipa o normal e sai (igual SSA)
+  if not us3 then
+    g_game.equipItemId(normalId2)
+    return
+  end
+
+  -- Equipar Might
+  if (hp <= eq2) and (us and us:getId() ~= 3088) then
+    g_game.equipItemId(mightId)
+    return delay(300)
+  end
+
+  -- Voltar normal
+  if (hp >= un2) and c(us and us:getId() ~= normalId2) then
+    g_game.equipItemId(normalId2)
+    return delay(300)
+  end
+end
+end)
+
+
+macro(10, function()
+  if not storage[switchSwap] or storage[switchSwap].enabled ~= true then return end
+  if storage[panelSoftBoots .. "labelSSA"] then
+
+  local equipPercent    = storage[panelSoftBoots .. "equipSSA"]
+  local desequipPercent = storage[panelSoftBoots .. "desequipSSA"]
+  local normalItem      = storage[panelSoftBoots .. "idAmulet1"]
+  local customItem      = storage[panelSoftBoots .. "idSSA"]
+
+  if not equipPercent or not desequipPercent then return end
+  if not normalItem or normalItem <= 100 then return end
+  if not customItem or customItem <= 100 then
+    
+    local us2 = getSlot(SlotNeck)
+    if not us2 or us:getId() ~= normalItem then
+      g_game.equipItemId(normalItem)
+    end
+    return
+  end
+
+  local hp = hppercent()
+  local us2 = getSlot(SlotNeck)
+
+  if us2 and us2:getId() ~= customItem and us2:getId() ~= normalItem then
+    g_game.equipItemId(normalItem)
+    return delay(250)
+  end
+
+  if hp <= equipPercent then
+    if not us2 or us2:getId() ~= customItem then
+      g_game.equipItemId(customItem)
+      return delay(250)
     end
 
-    if #candidatesMP > 0 then
-      table.sort(candidatesMP, function(a, b) return a.th < b.th end)
-      for _, c in ipairs(candidatesMP) do
-        useWith(c.id, me)
-        return
-      end
+  elseif hp >= desequipPercent or not us2 or us2:getId() <= 0 then
+    if not us2 or us2:getId() ~= normalItem then
+      g_game.equipItemId(normalItem)
+      return delay(250)
     end
   end
+end
 end)
