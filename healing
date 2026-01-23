@@ -809,13 +809,11 @@ macro(10, function()
   -- Equipar Might
   if (hp <= eq2) and (us and us:getId() ~= 3088) then
     g_game.equipItemId(mightId)
-    return delay(300)
   end
 
   -- Voltar normal
-  if (hp >= un2) and c(us and us:getId() ~= normalId2) then
+  if (hp >= un2) and (us and us:getId() ~= normalId2) then
     g_game.equipItemId(normalId2)
-    return delay(300)
   end
 end
 end)
@@ -831,34 +829,34 @@ macro(10, function()
   local customItem      = storage[panelSoftBoots .. "idSSA"]
 
   if not equipPercent or not desequipPercent then return end
-  if not normalItem or normalItem <= 100 then return end
-  if not customItem or customItem <= 100 then
     
-    local us2 = getSlot(SlotNeck)
-    if not us2 or us:getId() ~= normalItem then
+  local us2 = getSlot(SlotNeck)
+  local hp = hppercent()
+
+  if isInPz and isInPz() then
+    if not us2 or us2:getId() ~= normalItem then
       g_game.equipItemId(normalItem)
     end
     return
   end
 
-  local hp = hppercent()
-  local us2 = getSlot(SlotNeck)
+  if not us2 then
+    g_game.equipItemId(normalItem)
+    return
+  end
 
   if us2 and us2:getId() ~= customItem and us2:getId() ~= normalItem then
     g_game.equipItemId(normalItem)
-    return delay(250)
   end
 
   if hp <= equipPercent then
     if not us2 or us2:getId() ~= customItem then
       g_game.equipItemId(customItem)
-      return delay(250)
     end
 
   elseif hp >= desequipPercent or not us2 or us2:getId() <= 0 then
     if not us2 or us2:getId() ~= normalItem then
       g_game.equipItemId(normalItem)
-      return delay(250)
     end
   end
 end
