@@ -465,7 +465,7 @@ local function makeScrollTextLabel(scroll)
   lb:setId("txtOverlay")
   lb:setText("")
   lb:setTextAlign(AlignCenter)
-  lb:setFont("verdana-9px-rounded")
+  lb:setFont("verdana-9px")
   lb:setColor("white")
   lb:setPhantom(true) -- deixa clicar/arrastar na scrollbar mesmo com label em cima
   lb:fill("parent")
