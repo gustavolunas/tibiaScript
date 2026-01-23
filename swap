@@ -460,6 +460,18 @@ UIWindow
 ]], g_ui.getRootWidget())
 panelSwap:hide()
 
+local function makeScrollTextLabel(scroll)
+  local lb = g_ui.createWidget('Label', scroll)
+  lb:setId("txtOverlay")
+  lb:setText("")
+  lb:setTextAlign(AlignCenter)
+  lb:setFont("verdana-9px-rounded")
+  lb:setColor("white")
+  lb:setPhantom(true) -- deixa clicar/arrastar na scrollbar mesmo com label em cima
+  lb:fill("parent")
+  return lb
+end
+
 swapButton.settings.onClick = function()
   panelSwap:setVisible(not panelSwap:isVisible())
 end
@@ -554,7 +566,7 @@ local dualScrolls = {
         unequipScroll="desequipEnergy",
         defaultEq=70, 
         defaultUn=90,
-        name="[Energy]"
+        name="[Energy Ring]"
     },
     {
         switch="labelMightRing", 
@@ -562,7 +574,7 @@ local dualScrolls = {
         unequipScroll="desequipMight",
         defaultEq=70, 
         defaultUn=90,
-        name="[Might]"
+        name="[Might Ring]"
     },
     {
         switch="labelSSA", 
@@ -575,65 +587,49 @@ local dualScrolls = {
 }
 
 for _, group in ipairs(dualScrolls) do
-    local swWidget = panelSwap[group.switch]
-    local eqWidget = panelSwap[group.equipScroll]
-    local unWidget = panelSwap[group.unequipScroll]
+  local swWidget = panelSwap[group.switch]
+  local eqWidget = panelSwap[group.equipScroll]
+  local unWidget = panelSwap[group.unequipScroll]
 
-    if swWidget and eqWidget and unWidget then
-        
-        -- Carregar Storages OU Defaults
-        local savedEq = storage[panelSoftBoots .. group.equipScroll]
-        local savedUn = storage[panelSoftBoots .. group.unequipScroll]
+  if swWidget and eqWidget and unWidget then
+    local savedEq = storage[panelSoftBoots .. group.equipScroll]
+    local savedUn = storage[panelSoftBoots .. group.unequipScroll]
 
-        if savedEq then eqWidget:setValue(savedEq) else eqWidget:setValue(group.defaultEq) end
-        if savedUn then unWidget:setValue(savedUn) else unWidget:setValue(group.defaultUn) end
+    eqWidget:setValue(savedEq or group.defaultEq)
+    unWidget:setValue(savedUn or group.defaultUn)
 
-        local function updateDualText()
-            local eqVal = eqWidget:getValue()
-            local unVal = unWidget:getValue()
-            swWidget:setText("Eq: " .. eqVal .. "% " .. group.name .. " Un: " .. unVal .. "%")
-        end
-        updateDualText()
+    local eqLabel = eqWidget:recursiveGetChildById("txtOverlay") or makeScrollTextLabel(eqWidget)
+    local unLabel = unWidget:recursiveGetChildById("txtOverlay") or makeScrollTextLabel(unWidget)
 
-        eqWidget.onValueChange = function(w, value)
-            storage[panelSoftBoots .. group.equipScroll] = value
-            updateDualText()
-        end
+    local function updateDualText()
+      local eqVal = eqWidget:getValue()
+      local unVal = unWidget:getValue()
 
-        unWidget.onValueChange = function(w, value)
-            storage[panelSoftBoots .. group.unequipScroll] = value
-            updateDualText()
-        end
+      -- BotSwitch vira só um "toggle", sem texto variável
+      swWidget:setText(group.name)
+
+      -- Texto aparece nas scrolls
+      eqLabel:setText("            Eq: " .. eqVal .. "%")
+      eqLabel:setFont("verdana-9px-italic")
+      eqLabel:setColor("green")
+      unLabel:setText("            Un: " .. unVal .. "%")
+      unLabel:setFont("verdana-9px-italic")
+      unLabel:setColor("yellow")
     end
+
+    updateDualText()
+
+    eqWidget.onValueChange = function(_, value)
+      storage[panelSoftBoots .. group.equipScroll] = value
+      updateDualText()
+    end
+
+    unWidget.onValueChange = function(_, value)
+      storage[panelSoftBoots .. group.unequipScroll] = value
+      updateDualText()
+    end
+  end
 end
-
-macro(200, function()
-  if not storage[switchSwap] or storage[switchSwap].enabled ~= true then return end
-    if not storage[panelSoftBoots .. "labelBootsMP"] then 
-        return 
-    end
-
-    local idBootsNormal = storage[panelSoftBoots .. "idBoots1"]
-    local idBootsSoft   = storage[panelSoftBoots .. "idBoots2"]
-    local manaLimit     = storage[panelSoftBoots .. "menorMPBoots"] or 75
-
-    if not idBootsNormal or idBootsNormal <= 100 then return end
-    if not idBootsSoft or idBootsSoft <= 100 then return end
-
-    local player = g_game.getLocalPlayer()
-    local feetSlot = player:getInventoryItem(InventorySlotFeet)
-    local feetId = feetSlot and feetSlot:getId() or 0
-
-    if manapercent() < manaLimit then
-        if feetId ~= idBootsSoft then
-            g_game.equipItemId(idBootsSoft)
-        end
-    else
-        if feetId ~= idBootsNormal then
-            g_game.equipItemId(idBootsNormal)
-        end
-    end
-end)
 
 macro(200, function()
   if not storage[switchSwap] or storage[switchSwap].enabled ~= true then return end
@@ -736,3 +732,131 @@ macro(200, function()
     end
 end)
 
+macro(10, function()
+  if not storage[switchSwap] or storage[switchSwap].enabled ~= true then return end
+  if not panelSwap.labelEnergyRing:isOn() then return end
+
+  local normalId  = storage[panelSoftBoots .. "idRing1"]
+  local specialId = storage[panelSoftBoots .. "idEnergyRing"]
+  local eq = storage[panelSoftBoots .. "equipEnergy"]
+  local un = storage[panelSoftBoots .. "desequipEnergy"]
+
+  if not eq or not un then return end
+  if not normalId or normalId <= 100 then return end
+  if not specialId or specialId <= 100 then return end
+
+  local hp = hppercent()
+  local mp = manapercent()
+  local us = getSlot(SlotFinger) -- ring atual
+
+  -- PZ: garante normal e sai
+  if isInPz and isInPz() then
+    if not us or us:getId() ~= normalId then
+      g_game.equipItemId(normalId)
+    end
+    return
+  end
+
+  -- ✅ se NÃO tiver ring equipado, equipa o normal e sai (igual SSA)
+  if not us then
+    g_game.equipItemId(normalId)
+    return
+  end
+
+
+  -- Equipar Energy (hp baixo + mana >= 15)
+  if (hp <= eq and mp >= 15) and (us and us:getId() ~= 3088) then
+    g_game.equipItemId(specialId)
+    return delay(300)
+
+  -- Voltar normal (hp alto OU mana <= 14)
+  elseif (hp >= un or mp <= 14) and (us and us:getId() ~= normalId)  then
+    g_game.equipItemId(normalId)
+    return delay(300)
+  end
+end)
+
+macro(10, function()
+  if not storage[switchSwap] or storage[switchSwap].enabled ~= true then return end
+  if not panelSwap.labelMightRing:isOn() then return end
+
+  local normalId2 = storage[panelSoftBoots .. "idRing2"]
+  local mightId   = storage[panelSoftBoots .. "idMightRing"]
+  local eq2       = storage[panelSoftBoots .. "equipMight"]
+  local un2       = storage[panelSoftBoots .. "desequipMight"]
+
+  if not eq2 or not un2 then return end
+  if not normalId2 or normalId2 <= 100 then return end
+  if not mightId or mightId <= 100 then return end
+
+  local hp = hppercent()
+  local us3 = getSlot(SlotFinger)
+
+  if isInPz and isInPz() then
+    if not us3 or us3:getId() ~= normalId2 then
+      g_game.equipItemId(normalId2)
+    end
+    return
+  end
+
+  -- ✅ se NÃO tiver ring equipado, equipa o normal e sai (igual SSA)
+  if not us3 then
+    g_game.equipItemId(normalId2)
+    return
+  end
+
+  -- Equipar Might
+  if (hp <= eq2) and (us and us:getId() ~= 3088) then
+    g_game.equipItemId(mightId)
+    return delay(300)
+  end
+
+  -- Voltar normal
+  if (hp >= un2) and c(us and us:getId() ~= normalId2) then
+    g_game.equipItemId(normalId2)
+    return delay(300)
+  end
+end)
+
+
+macro(10, function()
+  if not storage[switchSwap] or storage[switchSwap].enabled ~= true then return end
+  if not panelSwap.labelSSA:isOn() then return end
+
+  local equipPercent    = storage[panelSoftBoots .. "equipSSA"]
+  local desequipPercent = storage[panelSoftBoots .. "desequipSSA"]
+  local normalItem      = storage[panelSoftBoots .. "idAmulet1"]
+  local customItem      = storage[panelSoftBoots .. "idSSA"]
+
+  if not equipPercent or not desequipPercent then return end
+  if not normalItem or normalItem <= 100 then return end
+  if not customItem or customItem <= 100 then
+    
+    local us2 = getSlot(SlotNeck)
+    if not us2 or us:getId() ~= normalItem then
+      g_game.equipItemId(normalItem)
+    end
+    return
+  end
+
+  local hp = hppercent()
+  local us2 = getSlot(SlotNeck)
+
+  if us2 and us2:getId() ~= customItem and us2:getId() ~= normalItem then
+    g_game.equipItemId(normalItem)
+    return delay(250)
+  end
+
+  if hp <= equipPercent then
+    if not us2 or us2:getId() ~= customItem then
+      g_game.equipItemId(customItem)
+      return delay(250)
+    end
+
+  elseif hp >= desequipPercent or not us2 or us2:getId() <= 0 then
+    if not us2 or us2:getId() ~= normalItem then
+      g_game.equipItemId(normalItem)
+      return delay(250)
+    end
+  end
+end)
