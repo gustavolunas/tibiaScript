@@ -739,12 +739,8 @@ macro(10, function()
 
   local normalId  = storage[panelSoftBoots .. "idRing1"]
   local specialId = storage[panelSoftBoots .. "idEnergyRing"]
-  local eq = storage[panelSoftBoots .. "equipEnergy"]
-  local un = storage[panelSoftBoots .. "desequipEnergy"]
-
-  if not eq or not un then return end
-  if not normalId or normalId <= 100 then return end
-  if not specialId or specialId <= 100 then return end
+  local eq = storage[panelSoftBoots .. "equipEnergy"] or 70
+  local un = storage[panelSoftBoots .. "desequipEnergy"] or 90
 
   local hp = hppercent()
   local mp = manapercent()
@@ -783,12 +779,8 @@ macro(10, function()
   if storage[panelSoftBoots .. "labelMightRing"] then
   local normalId2 = storage[panelSoftBoots .. "idRing2"]
   local mightId   = storage[panelSoftBoots .. "idMightRing"]
-  local eq2       = storage[panelSoftBoots .. "equipMight"]
-  local un2       = storage[panelSoftBoots .. "desequipMight"]
-
-  if not eq2 or not un2 then return end
-  if not normalId2 or normalId2 <= 100 then return end
-  if not mightId or mightId <= 100 then return end
+  local eq2       = storage[panelSoftBoots .. "equipMight"] or 70
+  local un2       = storage[panelSoftBoots .. "desequipMight"] or 90
 
   local hp = hppercent()
   local us3 = getSlot(SlotFinger)
@@ -823,12 +815,10 @@ macro(10, function()
   if not storage[switchSwap] or storage[switchSwap].enabled ~= true then return end
   if storage[panelSoftBoots .. "labelSSA"] then
 
-  local equipPercent    = storage[panelSoftBoots .. "equipSSA"]
-  local desequipPercent = storage[panelSoftBoots .. "desequipSSA"]
+  local equipPercent    = storage[panelSoftBoots .. "equipSSA"] or 70
+  local desequipPercent = storage[panelSoftBoots .. "desequipSSA"] or 90
   local normalItem      = storage[panelSoftBoots .. "idAmulet1"]
   local customItem      = storage[panelSoftBoots .. "idSSA"]
-
-  if not equipPercent or not desequipPercent then return end
     
   local us2 = getSlot(SlotNeck)
   local hp = hppercent()
