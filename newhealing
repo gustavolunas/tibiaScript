@@ -515,7 +515,9 @@ local SPELL_OPTIONS = {
   "Exura Gran San",
   "Exura Ico",
   "Exura Med Ico",
-  "Exura Gran Ico"
+  "Exura Gran Ico",
+  "Exura Mas Nia",
+  "Exura Gran Tio"
 }
 
 -- "Amarração" da mana por spell (mana mínima necessária pra castar)
