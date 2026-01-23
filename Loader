@@ -2,10 +2,10 @@ local baseUrl = "https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs
 
 local macros = {
   "attackBot",
-  "healing",
+  "newhealing",
   "conditions",
   "follow",
-  "swap"
+  "newswap"
 }
 
 for _, file in ipairs(macros) do
