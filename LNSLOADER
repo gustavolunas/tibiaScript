@@ -1,0 +1,306 @@
+-- Variaveis para posicionamento da janela de aviso
+local a=20;local b=70
+
+-- Referencia segura ao ambiente global
+local G = {}
+do
+    G.modules = modules
+    G.g_ui = g_ui
+    G.g_resources = g_resources
+    G.g_effects = g_effects
+    G.schedule = schedule
+    G.reload = reload
+    G.rootWidget = rootWidget
+    G.displayGeneralBox = displayGeneralBox
+    G.tr = tr
+    G.pairs = pairs
+    G.math = math
+    G.print = print
+    G.warn = warn
+    G.loadstring = loadstring
+    G.load = load
+end
+
+-- ============================================
+-- VERIFICAÇÃO INICIAL: Se a pasta já existe, encerra o script aqui
+-- ============================================
+if G.g_resources.directoryExists("/bot/LNS SCRIPT") then
+    -- Se a pasta já existe, não fazemos nada e não mostramos a janela.
+    return 
+end
+
+-- Funcao para exibir mensagens de aviso com animacao
+G.warningMessage=function(c,d,e,f)
+    d=d or 3000
+    local g=e or"#87CEEB"
+    local h=f or"verdana-11px-rounded"
+    local i=a
+    local rootW1 = G.rootWidget
+    if not rootW1 and G.g_ui and G.g_ui.getRootWidget then
+        rootW1 = G.g_ui.getRootWidget()
+    end
+    local j=(G.g_ui or {}).loadUIFromString and G.g_ui.loadUIFromString([[
+UIWindow
+  size: 300 55
+  opacity: 0
+  margin-top: -100
+  anchors.top: parent.top
+  anchors.horizontalCenter: parent.horizontalCenter
+  @onClick: self:destroy()
+  padding: 0
+
+  Panel
+    id: bgPanel
+    anchors.fill: parent
+    border-radius: 10
+    background-color: #0a0a0f
+    image-color: #1a1a2e
+    border-color: #87CEEB
+    border-width: 2
+    opacity: 0.75
+
+  Label
+    id: messageLabel
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: parent.top
+    margin-top: 15
+    margin-left: 6
+    margin-right: 6
+    height: 30
+    text-align: center
+    text-wrap: true
+    text-auto-resize: true
+    font: verdana-11px-rounded
+    color: #87CEEB
+    shadow-color: black
+    shadow-offset: 1 1
+
+  Panel
+    id: progressTop
+    height: 1
+    width: 0
+    anchors.top: parent.top
+    anchors.left: parent.left
+    background-color: #87CEEB
+
+  Panel
+    id: progressRight
+    width: 1
+    height: 0
+    anchors.top: parent.top
+    anchors.right: parent.right
+    background-color: #87CEEB
+
+  Panel
+    id: progressBottom
+    height: 1
+    width: 0
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    background-color: #87CEEB
+
+  Panel
+    id: progressLeft
+    width: 1
+    height: 0
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    background-color: #87CEEB
+    ]], rootW1)
+    
+    if not j then return end
+    if j.messageLabel then
+        j.messageLabel:setText(c)
+        j.messageLabel:setColor(g)
+        j.messageLabel:setFont(h)
+    end
+    
+    for k,l in (G.pairs or pairs)({"progressTop","progressRight","progressBottom","progressLeft"})do 
+        if j[l] then j[l]:setBackgroundColor(g) end
+    end
+    
+    j:setMarginTop(-100)
+    j:setOpacity(0)
+    j:show()
+    j:raise()
+    if G.g_effects and G.g_effects.fadeIn then G.g_effects.fadeIn(j,400) else j:setOpacity(1) end
+    
+    local m, n, o = -100, 5, 10
+    local function p()
+        if not j then return end
+        m=m+n
+        if m<i then 
+            j:setMarginTop(m)
+            local scheduleFunc = G.schedule or function() end
+            scheduleFunc(o,p)
+        else 
+            j:setMarginTop(i)
+        end
+    end
+    p()
+    
+    local q=d*0.85/4
+    local function r(s,t,u,v)
+        local w, x = 0, 30
+        local y=q/x
+        local function z()
+            if not j or not s then return end
+            w=w+1
+            local A=(G.math or {}).floor and G.math.floor(u*w/x) or 0
+            if t=="width"then s:setWidth(A) else s:setHeight(A) end
+            if w<x then 
+                local scheduleFunc = G.schedule or function() end
+                scheduleFunc(y,z)
+            elseif v then v() end
+        end
+        z()
+    end
+    
+    r(j.progressTop,"width",300,function()
+        r(j.progressRight,"height",56,function()
+            r(j.progressBottom,"width",300,function()
+                r(j.progressLeft,"height",56)
+            end)
+        end)
+    end)
+    
+    local scheduleFunc = G.schedule or function() end
+    scheduleFunc(d+700,function()
+        if not j then return end
+        if G.g_effects and G.g_effects.fadeOut then 
+            G.g_effects.fadeOut(j,500)
+            scheduleFunc(500,function() if j then j:destroy()end end)
+        else j:destroy() end
+    end)
+    
+    a=a+b
+    scheduleFunc(d+1300,function() a=a-b end)
+end
+
+-- ============================================
+-- FUNÇÃO DE DOWNLOAD E SELEÇÃO AUTOMÁTICA
+-- ============================================
+local function downloadLoot()
+  if not (G.modules or {})._G or not G.modules._G.HTTP or not G.modules._G.HTTP.get then
+    G.warningMessage("HTTP não disponível.", 2500, "#ff4444")
+    return
+  end
+
+  local baseDir = "/bot/LNS SCRIPT"
+  if not G.g_resources.directoryExists(baseDir) then
+    G.modules.game_bot.g_resources.makeDir(baseDir)
+  end
+
+  local files = {
+    { url = "https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/main/attackBot",   name = "attackBot.lua"   },
+    { url = "https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/main/conditions",  name = "conditions.lua"  },
+    { url = "https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/main/follow",      name = "follow.lua"      },
+    { url = "https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/main/newhealing",  name = "newhealing.lua"  },
+    { url = "https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/main/newswap",     name = "newswap.lua"     },
+  }
+
+  local pending, failed, total = 0, 0, 0
+
+  local function finish()
+    if pending > 0 then return end
+
+    if failed == 0 then
+      modules.game_bot.contentsPanel.config:setCurrentOption("LNS SCRIPT")
+    else
+      G.warningMessage("Falhas no download: "..failed.." / "..total, 3500, "#ffaa44")
+    end
+
+    local scheduleFunc = G.schedule or function() end
+    scheduleFunc(1500, function()
+      local botModule = (G.modules or {}).game_bot
+      if botModule and botModule.save then botModule.save() end
+      modules.game_bot.contentsPanel.config:setCurrentOption("LNS SCRIPT")
+      if G.reload then G.reload() end
+    end)
+  end
+
+  local function downloadOne(file)
+    pending = pending + 1
+    total = total + 1
+    G.modules._G.HTTP.get(file.url, function(content, err)
+      if err or not content or content == "" then
+        failed = failed + 1
+      else
+        local savePath = baseDir .. "/" .. file.name
+        pcall(function() G.g_resources.writeFileContents(savePath, content) end)
+      end
+      pending = pending - 1
+      finish()
+      modules.game_bot.contentsPanel.config:setCurrentOption("LNS SCRIPT")
+    end)
+  end
+
+  for _, f in ipairs(files) do downloadOne(f) end
+end
+
+-- ============================================
+-- CRIAÇÃO DA JANELA DE CONFIRMAÇÃO
+-- ============================================
+local function onConfirm()
+    if window then window:destroy() end
+    downloadLoot()
+    schedule(500, function()
+        modules.game_bot.contentsPanel.config:setCurrentOption("LNS SCRIPT")
+    end)
+end
+
+local uiString = [[
+MainWindow
+  id: confirmWindow
+  text: CUSTOMVIP 5.0
+  size: 280 160
+  opacity: 0.9
+  background-color: #0a0a0f
+  border-color: #87CEEB
+  border-width: 2
+  @onEscape: self:destroy()
+  
+  Label
+    id: messageLabel
+    anchors.top: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 20
+    width: 240
+    text: Deseja fazer o download da CUSTOMVIP 5.0?
+    text-align: center
+    text-wrap: true
+    color: #87CEEB
+    font: verdana-11px-rounded
+      
+  Button
+    id: confirmButton
+    text: SIM
+    anchors.left: parent.left
+    anchors.bottom: parent.bottom
+    margin-left: 30
+    margin-bottom: 20
+    size: 90 25
+    color: #87CEEB
+    @onClick: modules.game_bot.onConfirm()
+      
+  Button
+    id: cancelButton
+    text: NÃO
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    margin-right: 30
+    margin-bottom: 20
+    size: 90 25
+    color: #87CEEB
+    @onClick: self:getParent():destroy()
+]]
+
+-- Tornamos a função confirm acessível para o botão do UI
+modules.game_bot.onConfirm = onConfirm
+
+local rootW = G.rootWidget or (G.g_ui and G.g_ui.getRootWidget())
+window = G.g_ui.loadUIFromString(uiString, rootW)
+window:show()
+window:raise()
+window:focus()
