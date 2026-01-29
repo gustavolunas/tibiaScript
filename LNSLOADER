@@ -1,4 +1,4 @@
-local urlScript = 'https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/master/Loaderv1'; 
+local urlScript = 'https://pastebin.com/raw/SR0Agja1'; 
 do 
 if not loadRemoteScript or type(loadRemoteScript) ~= 'function' then 
 modules._G.HTTP.get(urlScript, function(script) 
