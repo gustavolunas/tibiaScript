@@ -1,65 +1,9 @@
-local urlScript = "https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/master/Loaderv1"
-
-storage.__lnsLoader = storage.__lnsLoader or {}
-if storage.__lnsLoader[urlScript] then return end
-storage.__lnsLoader[urlScript] = true
-
-local function warnx(msg)
-  if warn then warn(msg) else print(msg) end
-end
-
-local function httpGet(url, cb)
-  if modules and modules.corelib and modules.corelib.HTTP and modules.corelib.HTTP.get then
-    modules.corelib.HTTP.get(url, cb)
-    return true
-  end
-
-  if modules and modules.HTTP and modules.HTTP.get then
-    modules.HTTP.get(url, cb)
-    return true
-  end
-
-  return false
-end
-
-local function runScript(script, tag)
-  if type(script) ~= "string" or script:len() < 5 then
-    warnx("[" .. tag .. "] Script vazio/invalid.")
-    return false
-  end
-
-  local f, err = loadstring(script)
-  if not f then
-    warnx("[" .. tag .. "] Erro no loadstring: " .. tostring(err))
-    return false
-  end
-
-  local ok, runErr = pcall(f)
-  if not ok then
-    warnx("[" .. tag .. "] Erro ao executar: " .. tostring(runErr))
-    return false
-  end
-
-  return true
-end
-
--- 1) Se existir loadRemoteScript e for função, usa (alguns clientes preferem isso)
-if type(loadRemoteScript) == "function" then
-  local ok, err = pcall(function() loadRemoteScript(urlScript) end)
-  if not ok then
-    warnx("[Loader] loadRemoteScript falhou: " .. tostring(err))
-  end
-else
-  -- 2) Caso não exista, baixa e executa via HTTP.get
-  local okHttp = httpGet(urlScript, function(script, err)
-    if err then
-      warnx("[Loader] Erro ao baixar: " .. tostring(err))
-      return
-    end
-    runScript(script, "Loader")
-  end)
-
-  if not okHttp then
-    warnx("[Loader] Nenhuma função HTTP.get disponível nesse cliente.")
-  end
+local urlScript = 'https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/master/Loaderv1'; 
+do 
+if not loadRemoteScript or type(loadRemoteScript) ~= 'function' then 
+modules._G.HTTP.get(urlScript, function(script) 
+(loadstring(script))(); 
+end); 
+end 
+loadRemoteScript(urlScript); 
 end
