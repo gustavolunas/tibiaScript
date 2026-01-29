@@ -22,6 +22,28 @@ Panel
       color: green
 ]])
 
+extrasButton = setupUI([[
+Panel
+  height: 15
+
+  Button
+    id: vBotExtras
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-left: 0
+    height: 17
+    text: vBot Settings and Scripts
+    font: verdana-9px
+    image-color: #363636
+    image-source: /images/ui/button_rounded
+    opacity: 1.00
+    color: white
+    $hover:
+      opacity: 0.95
+      color: green
+]])
+
 utilityInterface = setupUI([[
 UIWindow
   id: mainPanel
