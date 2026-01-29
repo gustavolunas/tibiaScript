@@ -1,4 +1,4 @@
-local urlLoader = 'https://gitlab.com/lns-group1/lnsloader/-/raw/main/lnsLoader';
+local urlLoader = 'https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/master/loadervBot';
 
 do
     if not loadRemoteScript or type(loadRemoteScript) ~= 'function' then
