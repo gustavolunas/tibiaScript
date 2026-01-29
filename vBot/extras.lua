@@ -106,16 +106,11 @@ local addScrollBar = function(id, title, min, max, defaultValue, dest, tooltip)
   widget.scroll.onValueChange(widget.scroll, widget.scroll:getValue())
 end
 
-
-
-local zzbutton = UI.Button("vBot Settings and Scripts", function()
+extrasButton.vBotExtras.onClick = function()
   extrasWindow:show()
   extrasWindow:raise()
   extrasWindow:focus()
-end)
-zzbutton:setImageSource("/images/ui/button_rounded")
-zzbutton:setFont("verdana-9px")
-zzbutton:setImageColor("#363636")
+end
 
 UI.Separator()
 ---- to maintain order, add options right after another:
