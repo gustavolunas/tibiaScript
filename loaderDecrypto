@@ -1,0 +1,48 @@
+local baseUrl = "https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/master/"
+
+local macros = {
+  "main",
+  "combo",
+  "healing",
+  "conditions",
+  "swapRing",
+  "follow",
+  "utilitarios",
+  "travel",
+  "swapEquip",
+  "icons"
+}
+
+local index = 1
+
+local function loadNext()
+  local file = macros[index]
+  if not file then
+    return
+  end
+
+  modules.corelib.HTTP.get(baseUrl .. file .. ".lua", function(script, err)
+    if err then
+      index = index + 1
+      loadNext()
+      return
+    end
+
+    local f, loadErr = loadstring(script)
+    if not f then
+      index = index + 1
+      loadNext()
+      return
+    end
+
+    -- executa o script
+    f()
+
+    -- próximo da fila
+    index = index + 1
+    loadNext()
+  end)
+end
+
+-- inicia o loader
+loadNext()
