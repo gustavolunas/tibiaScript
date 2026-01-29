@@ -1,48 +1,525 @@
-local baseUrl = "https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/master/"
+-- =========================
+-- CONFIG
+-- =========================
+local TARGET_NAME   = "Lns Custom"
+local BASE_DIR      = "/bot/" .. TARGET_NAME
+local INSTALLED_TAG = BASE_DIR .. "/.installed"
 
-local macros = {
-  "main",
-  "combo",
-  "healing",
-  "conditions",
-  "swapRing",
-  "follow",
-  "utilitarios",
-  "travel",
-  "swapEquip",
-  "icons"
+-- Se já existe (pasta ou marker), não mostra painel e não faz nada
+if g_resources and (
+    (g_resources.fileExists and g_resources.fileExists(INSTALLED_TAG)) or
+    (g_resources.directoryExists and g_resources.directoryExists(BASE_DIR))
+) then
+  return
+end
+
+-- =========================
+-- UI
+-- =========================
+loaderInterface = setupUI([[
+UIWindow
+  id: mainPanel
+  size: 250 120
+  border: 1 black
+  anchors.centerIn: parent
+  margin-top: -60
+  margin-left: -10
+
+  Panel
+    id: background
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    background-color: black
+    opacity: 0.70
+
+  Panel
+    id: topPanel
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    size: 120 30
+    text-align: center
+    !text: tr('DOWNLOAD CUSTOM LNS')
+    color: orange
+    margin-left: 0
+    margin-right: 0
+    background-color: black
+    $hover:
+      image-color: gray
+
+  FlatPanel
+    id: panelSpeed
+    anchors.top: prev.bottom
+    anchors.right: parent.right
+    anchors.left: parent.left
+    margin-top: 5
+    margin-right: 8
+    margin-left: 8
+    height: 50
+    image-color: #363636
+    layout: verticalBox
+
+  ProgressBar
+    id: bar
+    anchors.top: panelSpeed.top
+    anchors.left: panelSpeed.left
+    anchors.right: panelSpeed.right
+    background-color: red
+    margin-top: 15
+    margin-left: 5
+    margin-right: 5
+    height: 14
+    width: 240
+    text-align: center
+    font: verdana-9px
+
+  Label
+    id: textLabel2
+    anchors.top: bar.bottom
+    anchors.left: panelSpeed.left
+    anchors.right: panelSpeed.right
+    anchors.bottom: panelSpeed.bottom
+    margin-top: 5
+    margin-left: 6
+    margin-right: 6
+    height: 55
+    text-align: center
+    text-wrap: true
+    text-auto-resize: true
+    color: #e6e6e6
+    font: verdana-11px-rounded
+
+  Label
+    id: textLabel
+    anchors.top: panelSpeed.top
+    anchors.left: panelSpeed.left
+    anchors.right: panelSpeed.right
+    anchors.bottom: panelSpeed.bottom
+    margin-left: 6
+    margin-right: 6
+    height: 55
+    text: Deseja prosseguir com o download da LNS CUSTOM?
+    text-align: center
+    text-wrap: true
+    text-auto-resize: true
+    color: #e6e6e6
+    font: verdana-11px-rounded
+
+  Button
+    id: rejeitar
+    anchors.left: panelSpeed.left
+    anchors.top: prev.bottom
+    height: 20
+    width: 118
+    text: REJEITAR
+    color: red
+    font: verdana-9px
+    image-source: /images/ui/button_rounded
+    image-color: #363636
+    margin-top: 4
+    opacity: 1.00
+    $hover:
+      opacity: 0.70
+
+  Button
+    id: aceitar
+    anchors.left: rejeitar.right
+    anchors.top: textLabel.bottom
+    height: 20
+    width: 118
+    text: PROSSEGUIR
+    color: green
+    font: verdana-9px
+    image-source: /images/ui/button_rounded
+    image-color: #363636
+    margin-top: 4
+    opacity: 1.00
+    $hover:
+      opacity: 0.70
+]], g_ui.getRootWidget())
+
+loaderInterface:hide()
+loaderInterface.bar:hide()
+loaderInterface.textLabel2:hide()
+
+modules.game_textmessage.displayGameMessage("Seja bem-vindo a LNS Custom! aguarde um momento enquanto a importacao esta sendo preparada.")
+schedule(1500, function()
+  if loaderInterface then loaderInterface:show() end
+end)
+
+-- =========================
+-- DOWNLOAD
+-- =========================
+
+local function forceSelectBotConfig(optionText, tries, delayMs)
+  tries = tries or 30       -- 30 tentativas
+  delayMs = delayMs or 150  -- a cada 150ms (~4,5s total)
+
+  local function attempt(n)
+    local cfg = modules.game_bot
+      and modules.game_bot.contentsPanel
+      and modules.game_bot.contentsPanel.config
+
+    if cfg and cfg.setCurrentOption then
+      local ok = pcall(function()
+        cfg:setCurrentOption(optionText)
+      end)
+
+      if ok then
+        return true
+      end
+    end
+
+    if n <= 0 then
+      modules.game_textmessage.displayGameMessage("Nao consegui selecionar a config: " .. optionText)
+      return false
+    end
+
+    schedule(delayMs, function() attempt(n - 1) end)
+  end
+
+  attempt(tries)
+end
+
+local baseFiles = {
+  { url = "https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/master/Loaderv1",   name = "LNS Loader.lua",   subdir = "" },
 }
 
-local index = 1
+local function ensureDir()
+  -- você disse que já conseguiu ajustar isso, então deixei robusto:
+  if g_resources and g_resources.directoryExists and g_resources.directoryExists(BASE_DIR) then return true end
 
-local function loadNext()
-  local file = macros[index]
-  if not file then
+  if modules.game_bot and modules.game_bot.g_resources and modules.game_bot.g_resources.makeDir then
+    pcall(function() modules.game_bot.g_resources.makeDir(BASE_DIR) end)
+  end
+
+  -- fallback: tentar criar escrevendo arquivo
+  if g_resources and g_resources.writeFileContents then
+    pcall(function() g_resources.writeFileContents(BASE_DIR .. "/.keep", "ok") end)
+  end
+
+  return (g_resources and g_resources.directoryExists and g_resources.directoryExists(BASE_DIR)) == true
+end
+
+-- ============================================
+-- vBot / CaveBot / TargetBot (GitHub API)
+-- baixa para dentro da SUA config BASE_DIR
+-- ============================================
+local vbotApiLinks = {
+  -- agora vem do teu repo
+  { path = "cavebot",   link = "https://api.github.com/repos/gustavolunas/tibiaScript/contents/cavebot?ref=master" },
+  { path = "targetbot", link = "https://api.github.com/repos/gustavolunas/tibiaScript/contents/targetbot?ref=master" },
+  { path = "vBot", link = "https://api.github.com/repos/gustavolunas/tibiaScript/contents/vBot?ref=master" },
+
+}
+
+local vBotFilesAllowed = {
+    ["Conditions.lua"] = true,
+    ["Conditions.otui"] = true,
+    ["Containers.lua"] = true,
+    ["Dropper.lua"] = true,
+    ["Equipper.lua"] = true,
+    ["analyzer.lua"] = true,
+    ["analyzer.otui"] = true,
+    ["cavebot.lua"] = true,
+    ["cavebot_control_panel.lua"] = true,
+    ["configs.lua"] = true,
+    ["depositer_config.lua"] = true,
+    ["depositer_config.otui"] = true,
+    ["depot_withdraw.lua"] = true,
+    ["eat_food.lua"] = true,
+    ["equip.lua"] = true,
+    ["equipper.otui"] = true,
+    ["extras.lua"] = true,
+    ["extras.otui"] = true,
+    ["hold_target.lua"] = true,
+    ["ingame_editor.lua"] = true,
+    ["items.lua"] = true,
+    ["new_cavebot_lib.lua"] = true,
+    ["quiver_label.lua"] = true,
+    ["quiver_manager.lua"] = true,
+    ["spy_level.lua"] = true,
+    ["supplies.lua"] = true,
+    ["supplies.otui"] = true,
+    ["text2.png"] = true,
+    ["tools.lua"] = true,
+    ["version.txt"] = true,
+    ["vlib.lua"] = true
+}
+-- loader do vBot (igual o importer)
+local vbotToLoad = [[
+local configName = modules.game_bot.contentsPanel.config:getCurrentOption().text
+
+local configFiles = g_resources.listDirectoryFiles("/bot/" .. configName .. "/vBot", true, false)
+for i, file in ipairs(configFiles) do
+  local ext = file:split(".")
+  if ext[#ext]:lower() == "ui" or ext[#ext]:lower() == "otui" then
+    g_ui.importStyle(file)
+  end
+end
+
+local function loadScript(name)
+  return dofile("/vBot/" .. name .. ".lua")
+end
+
+-- here you can set manually order of scripts
+-- libraries should be loaded first
+local luaFiles = {
+  "extras",
+  "items",
+  "vlib",
+  "new_cavebot_lib",
+  "configs", -- do not change this and above
+  "cavebot",
+  "Conditions",
+  "ingame_editor",
+  "Dropper",
+  "quiver_manager",
+  "quiver_label",
+  "tools",
+  "depot_withdraw",
+  "eat_food",
+  "equip",
+  "analyzer",
+  "spy_level",
+  "supplies",
+  "depositer_config",
+  "hold_target",
+  "cavebot_control_panel",
+  "Containers",
+}
+
+for i, file in ipairs(luaFiles) do
+  loadScript(file)
+end
+]]
+
+local function buildVBotQueue(onDone)
+  local HTTP = modules._G and modules._G.HTTP
+  if not HTTP or not HTTP.get then
+    onDone(nil, "HTTP.get nao disponivel")
+    return
+  end
+  if not json or not json.decode then
+    onDone(nil, "json.decode nao disponivel")
     return
   end
 
-  modules.corelib.HTTP.get(baseUrl .. file .. ".lua", function(script, err)
+  local queue = {}
+  local idx = 1
+
+  local function nextCategory()
+    local cat = vbotApiLinks[idx]
+    if not cat then
+      onDone(queue, nil)
+      return
+    end
+
+    HTTP.get(cat.link, function(content, err)
+      if err or not content then
+        onDone(nil, "Falha GitHub API: " .. cat.path)
+        return
+      end
+
+      local data = json.decode(content)
+      if type(data) ~= "table" then
+        onDone(nil, "JSON invalido: " .. cat.path)
+        return
+      end
+
+      for _, item in ipairs(data) do
+        if item.type == "file" and item.download_url then
+          if cat.path == "vBot" then
+            if vBotFilesAllowed[item.name] then
+              table.insert(queue, { url = item.download_url, name = item.name, subdir = cat.path })
+            end
+          else
+            table.insert(queue, { url = item.download_url, name = item.name, subdir = cat.path })
+          end
+        end
+      end
+
+      idx = idx + 1
+      schedule(800, nextCategory) -- delay pra evitar rate-limit
+    end)
+  end
+
+  nextCategory()
+end
+
+local function ensureSubDir(subdir)
+  if not subdir or subdir == "" then return true end
+  local p = BASE_DIR .. "/" .. subdir
+  if g_resources.directoryExists(p) then return true end
+  pcall(function() g_resources.makeDir(p) end)
+  return g_resources.directoryExists(p)
+end
+
+local function patchVBotContent(fileName, content)
+  if not content then return content end
+
+  -- Removendo setDefaultTab('Tools')
+  content = content:gsub('setDefaultTab%(%s*["\']Tools["\']%s*%)', '')
+
+  -- Check Players false
+  content = content:gsub(
+    'addCheckBox%s*%(%s*"checkPlayer"%s*,%s*"Check Players"%s*,%s*true%s*,%s*rightPanel%s*,%s*"Auto look on players and mark level and vocation on character model"%s*%)',
+    'addCheckBox("checkPlayer", "Check Players", false, rightPanel, "Auto look on players and mark level and vocation on character model")'
+  )
+
+  -- Bless false
+  content = content:gsub(
+    'addCheckBox%s*%(%s*"bless"%s*,%s*"Buy bless at login"%s*,%s*true%s*,%s*rightPanel%s*,%s*"Say !bless at login."%s*%)',
+    'addCheckBox("bless", "Buy bless at login", false, rightPanel, "Say !bless at login.")'
+  )
+
+  return content
+end
+
+local function setProgress(done, total)
+  local bar = loaderInterface.bar
+  if not bar then return end
+  local pct = math.floor((done / total) * 100 + 0.5)
+  if pct < 0 then pct = 0 end
+  if pct > 100 then pct = 100 end
+  bar:setPercent(pct)
+  bar:setText("BAIXANDO... " .. pct .. "%")
+end
+
+local function finalizeSuccess()
+  -- marker instalado
+  if g_resources and g_resources.writeFileContents then
+    pcall(function() g_resources.writeFileContents(INSTALLED_TAG, "ok") end)
+  end
+
+  modules.game_textmessage.displayGameMessage("Download Concluido! LNS Custom esta pronta para uso.")
+
+  loaderInterface.bar:setPercent(100)
+  loaderInterface.bar:setText("CONCLUIDO!")
+
+  reload()
+end
+
+local function downloadAll()
+  if not ensureDir() then
+    modules.game_textmessage.displayGameMessage("Erro: nao consegui criar a pasta " .. BASE_DIR)
+    loaderInterface.aceitar:setEnabled(true)
+    loaderInterface.rejeitar:setEnabled(true)
+    return
+  end
+
+  local HTTP = modules._G and modules._G.HTTP
+  if not HTTP or not HTTP.get then
+    modules.game_textmessage.displayGameMessage("Erro: HTTP.get nao disponivel neste client.")
+    loaderInterface.aceitar:setEnabled(true)
+    loaderInterface.rejeitar:setEnabled(true)
+    return
+  end
+
+  loaderInterface.bar:show()
+  loaderInterface.textLabel:hide()
+  loaderInterface.textLabel2:show()
+  loaderInterface.textLabel2:setText("Preparando lista (vBot/CaveBot/TargetBot)...")
+  loaderInterface.bar:setPercent(0)
+  loaderInterface.bar:setText("BAIXANDO... 0%")
+
+  -- 1) monta fila do vBot (API)
+  buildVBotQueue(function(vbotQueue, err)
     if err then
-      index = index + 1
-      loadNext()
+      modules.game_textmessage.displayGameMessage("Erro preparando vBot: " .. err)
+      loaderInterface.textLabel2:setText("Erro no vBot. Veja o chat.")
+      loaderInterface.aceitar:setEnabled(true)
+      loaderInterface.rejeitar:setEnabled(true)
       return
     end
 
-    local f, loadErr = loadstring(script)
-    if not f then
-      index = index + 1
-      loadNext()
-      return
+    -- 2) junta tudo numa fila única
+    local queue = {}
+    for _, f in ipairs(baseFiles) do table.insert(queue, f) end
+    for _, f in ipairs(vbotQueue) do table.insert(queue, f) end
+
+    local total = #queue
+    local done, failed = 0, 0
+
+    local function setProgressLocal()
+      local pct = math.floor((done / total) * 100 + 0.5)
+      if pct < 0 then pct = 0 end
+      if pct > 100 then pct = 100 end
+      loaderInterface.bar:setPercent(pct)
+      loaderInterface.bar:setText("BAIXANDO... " .. pct .. "%")
+      loaderInterface.textLabel2:setText("Baixando... (" .. done .. "/" .. total .. ")")
     end
 
-    -- executa o script
-    f()
+    local function downloadOne(i)
+      local f = queue[i]
+      if not f then return end
 
-    -- próximo da fila
-    index = index + 1
-    loadNext()
+      -- garante subpasta
+      if not ensureSubDir(f.subdir) then
+        failed = failed + 1
+        done = done + 1
+        modules.game_textmessage.displayGameMessage("Falha criando pasta: " .. tostring(f.subdir))
+        setProgressLocal()
+        schedule(60, function() downloadOne(i + 1) end)
+        return
+      end
+
+      HTTP.get(f.url, function(content, err2)
+        if err2 or not content or content == "" then
+          failed = failed + 1
+          modules.game_textmessage.displayGameMessage("Falha ao baixar: " .. f.name)
+        else
+          local savePath = BASE_DIR .. (f.subdir ~= "" and ("/" .. f.subdir) or "") .. "/" .. f.name
+          content = patchVBotContent(f.name, content)
+          local ok = pcall(function()
+            g_resources.writeFileContents(savePath, content)
+          end)
+          if not ok then
+            failed = failed + 1
+            modules.game_textmessage.displayGameMessage("Falha ao salvar: " .. f.name)
+          end
+        end
+
+        done = done + 1
+        setProgressLocal()
+
+        if done >= total then
+          if failed == 0 then
+            -- escreve o loader do vBot na raiz da config
+            pcall(function()
+              g_resources.writeFileContents(BASE_DIR .. "/_Loader.lua", vbotToLoad)
+            end)
+            finalizeSuccess()
+          else
+            loaderInterface.textLabel2:setText("Falhas: " .. failed .. "/" .. total .. " (ver chat)")
+            loaderInterface.bar:setText("FALHOU")
+            loaderInterface.aceitar:setEnabled(true)
+            loaderInterface.rejeitar:setEnabled(true)
+          end
+          return
+        end
+
+        schedule(60, function() downloadOne(i + 1) end)
+      end)
+    end
+
+    loaderInterface.textLabel2:setText("Iniciando download...")
+    downloadOne(1)
   end)
 end
 
--- inicia o loader
-loadNext()
+
+-- =========================
+-- BUTTONS
+-- =========================
+loaderInterface.aceitar.onClick = function()
+  loaderInterface.aceitar:setEnabled(false)
+  loaderInterface.rejeitar:setEnabled(false)
+  downloadAll()
+end
+
+loaderInterface.rejeitar.onClick = function()
+  loaderInterface:hide()
+end
