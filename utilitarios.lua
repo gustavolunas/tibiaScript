@@ -2,7 +2,7 @@ UI.Separator()
 
 local iconUtilitys = setupUI([[
 Panel
-  height: 16
+  height: 17
 
   Button
     id: settings
@@ -485,8 +485,10 @@ macro(1, function()
   end
 end);
 
+isMobile = modules._G.g_app.isMobile();
+
 macro(100, function() 
-  if storage.utilityToggles["superDash"] ~= true or modules.corelib.g_keyboard.isCtrlPressed() then return; end
+  if storage.utilityToggles["superDash"] ~= true or isMobile then return; end
   if modules.game_console:isChatEnabled() then return; end
   local playerPos = pos()
   local tile
@@ -534,6 +536,74 @@ macro(200, function()
   end
 end)
 
+
+local cursorWidget = g_ui.getRootWidget():recursiveGetChildById('pointer')
+if not cursorWidget then
+  return
+end
+
+-- posição inicial do "ponteiro" (referência)
+local initialPos = {
+  x = cursorWidget:getPosition().x / cursorWidget:getWidth(),
+  y = cursorWidget:getPosition().y / cursorWidget:getHeight()
+}
+
+local availableKeys = {
+  Up    = { 0, -6 },
+  Down  = { 0,  6 },
+  Left  = { -7, 0 },
+  Right = { 7,  0 }
+}
+
+macro(100, function()
+  if storage.utilityToggles["superDash"] ~= true then return; end
+  if not isMobile then return; end
+
+  local myPos = pos()
+  if not myPos then return end
+
+  local keypadPos = {
+    x = cursorWidget:getPosition().x / cursorWidget:getWidth(),
+    y = cursorWidget:getPosition().y / cursorWidget:getHeight()
+  }
+
+  local diffPos = {
+    x = initialPos.x - keypadPos.x,
+    y = initialPos.y - keypadPos.y
+  }
+
+  -- mesma lógica de priorizar eixo "mais dominante"
+  if (diffPos.y < 0.46 and diffPos.y > -0.46) then
+    if diffPos.x > 0 then
+      myPos.x = myPos.x + availableKeys.Left[1]
+    elseif diffPos.x < 0 then
+      myPos.x = myPos.x + availableKeys.Right[1]
+    else
+      return
+    end
+  elseif (diffPos.x < 0.46 and diffPos.x > -0.46) then
+    if diffPos.y > 0 then
+      myPos.y = myPos.y + availableKeys.Up[2]
+    elseif diffPos.y < 0 then
+      myPos.y = myPos.y + availableKeys.Down[2]
+    else
+      return
+    end
+  else
+    return
+  end
+
+  local tile = g_map.getTile(myPos)
+  if not tile then return end
+
+  local top = tile:getTopUseThing()
+  if not top then return end
+
+  g_game.use(top)
+end)
+
+
+------------------------------------------
 local config = {
   SSAID = 3081,
   MIGHTID = 3048,
