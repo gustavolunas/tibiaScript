@@ -2,7 +2,7 @@ UI.Separator()
 
 local iconUtilitys = setupUI([[
 Panel
-  height: 15
+  height: 16
 
   Button
     id: settings
