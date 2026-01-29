@@ -106,12 +106,6 @@ local addScrollBar = function(id, title, min, max, defaultValue, dest, tooltip)
   widget.scroll.onValueChange(widget.scroll, widget.scroll:getValue())
 end
 
-extrasButton.vBotExtras.onClick = function()
-  extrasWindow:show()
-  extrasWindow:raise()
-  extrasWindow:focus()
-end
-
 UI.Separator()
 ---- to maintain order, add options right after another:
 --- add object
