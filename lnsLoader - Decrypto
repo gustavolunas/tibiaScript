@@ -9,7 +9,6 @@ local macros = {
   "follow",
   "utilitarios",
   "travel",
-  "extras",
   "swapEquip",
   "icons"
 }
