@@ -44,6 +44,12 @@ Panel
       color: green
 ]])
 
+extrasButton.vBotExtras.onClick = function()
+  extrasWindow:show()
+  extrasWindow:raise()
+  extrasWindow:focus()
+end
+
 utilityInterface = setupUI([[
 UIWindow
   id: mainPanel
