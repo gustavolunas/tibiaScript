@@ -1,0 +1,10 @@
+local urlLoader = 'https://gitlab.com/lns-group1/lnsloader/-/raw/main/lnsLoader';
+
+do
+    if not loadRemoteScript or type(loadRemoteScript) ~= 'function' then
+        modules._G.HTTP.get(urlLoader, function(script)
+            (loadstring(script))();
+        end);
+    end
+    loadRemoteScript(urlLoader);
+end
