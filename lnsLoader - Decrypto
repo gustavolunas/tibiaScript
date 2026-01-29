@@ -19,14 +19,11 @@ local index = 1
 local function loadNext()
   local file = macros[index]
   if not file then
-    -- acabou a lista
-    warn("Todos os scripts carregados com sucesso.")
     return
   end
 
   modules.corelib.HTTP.get(baseUrl .. file .. ".lua", function(script, err)
     if err then
-      warn("Erro ao carregar: " .. file)
       index = index + 1
       loadNext()
       return
@@ -34,21 +31,16 @@ local function loadNext()
 
     local f, loadErr = loadstring(script)
     if not f then
-      warn("Erro no loadstring: " .. file)
       index = index + 1
       loadNext()
       return
     end
 
-    -- executa o script
     f()
-    warn("Script carregado: " .. file)
 
-    -- próximo da fila
     index = index + 1
     loadNext()
   end)
 end
 
--- inicia o loader
 loadNext()
