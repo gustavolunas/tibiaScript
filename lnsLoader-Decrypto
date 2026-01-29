@@ -1,3 +1,5 @@
+warn("Carregando Scripts...")
+
 local baseUrl = "https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/master/"
 
 local macros = {
@@ -43,3 +45,5 @@ local function loadNext()
 end
 
 loadNext()
+warn("Scripts Carregados!")
+
