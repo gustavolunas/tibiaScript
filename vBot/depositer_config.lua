@@ -2,12 +2,14 @@ setDefaultTab("Cave")
 local panelName = "specialDeposit"
 local depositerPanel
 
-UI.Button("Stashing Settings", function()  
+buttonSta = UI.Button("Stashing Settings", function()  
     depositerPanel:show()
     depositerPanel:raise()
     depositerPanel:focus()
 end)
-
+buttonSta:setFont("verdana-9px")
+buttonSta:setImageSource("/images/ui/button_rounded")
+buttonSta:setImageColor("#828282")
 if not storage[panelName] then
     storage[panelName] = {
         items = {},
@@ -20,7 +22,7 @@ local config = storage[panelName]
 depositerPanel = UI.createWindow('DepositerPanel', rootWidget)
 depositerPanel:hide()
 -- basic one
-depositerPanel.CloseButton.onClick = function()
+depositerPanel.closePanel.onClick = function()
     depositerPanel:hide()
 end
 
@@ -123,7 +125,7 @@ function getStashingIndex(id)
 end
 
 UI.Separator()
-UI.Label("Sell Exeptions")
+UI.Label("Sell Exeptions"):setFont("verdana-9px")
 
 if type(storage.cavebotSell) ~= "table" then
   storage.cavebotSell = {23544, 3081}

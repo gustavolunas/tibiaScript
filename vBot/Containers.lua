@@ -1,4 +1,4 @@
-setDefaultTab("Tools")
+
 local panelName = "renameContainers"
 if type(storage[panelName]) ~= "table" then
     storage[panelName] = {
@@ -40,7 +40,6 @@ end
 
 local config = storage[panelName]
 
-UI.Separator()
 local renameContui = setupUI([[
 Panel
   height: 50
@@ -48,19 +47,26 @@ Panel
   Label
     text-align: center
     text: Container Panel
+    font: verdana-9px
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: parent.top
-    font: verdana-11px-rounded
 
   BotSwitch
     id: title
     anchors.top: prev.bottom
     anchors.left: parent.left
     text-align: center
-    width: 100
+    width: 110
     !text: tr('Open Minimised')
-    font: verdana-11px-rounded
+    image-source: /images/ui/button_rounded
+    font: verdana-9px
+    $on:
+      color: green
+      image-color: gray
+    $!on:
+      image-color: gray
+      color: white
 
   Button
     id: editContList
@@ -70,7 +76,9 @@ Panel
     margin-left: 3
     height: 17
     text: Setup
-    font: verdana-11px-rounded
+    font: verdana-9px
+    image-color: #363636
+    image-source: /images/ui/button_rounded
 
   Button
     id: reopenCont
@@ -81,7 +89,9 @@ Panel
     margin-right: 2
     height: 17
     margin-top: 3
-    font: verdana-11px-rounded
+    font: verdana-9px
+    image-color: #363636
+    image-source: /images/ui/button_rounded
 
   Button
     id: minimiseCont
@@ -91,7 +101,9 @@ Panel
     anchors.right: parent.right
     margin-right: 2
     height: 17
-    font: verdana-11px-rounded
+    font: verdana-9px
+    image-color: #363636
+    image-source: /images/ui/button_rounded
   ]])
 renameContui:setId(panelName)
 

@@ -7,6 +7,7 @@ local targetingTab = storage.extras.joinBot and "Cave" or "Target"
 setDefaultTab(cavebotTab)
 CaveBot.Extensions = {}
 importStyle("/cavebot/cavebot.otui")
+importStyle("/cavebot/config1.otui")
 importStyle("/cavebot/config.otui")
 importStyle("/cavebot/editor.otui")
 dofile("/cavebot/actions.lua")

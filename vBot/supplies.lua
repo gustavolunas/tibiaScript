@@ -164,13 +164,15 @@ end
 SuppliesWindow = UI.createWindow("SuppliesWindow")
 SuppliesWindow:hide()
 
-UI.Button(
+button = UI.Button(
   "Supply Settings",
   function()
     SuppliesWindow:setVisible(not SuppliesWindow:isVisible())
   end
 )
-
+button:setImageSource("/images/ui/button_rounded")
+button:setFont("verdana-9px")
+button:setImageColor("#828282")
 -- load settings
 local function loadSettings()
   -- panels
@@ -335,6 +337,10 @@ SuppliesWindow.staminaValue.onTextChange = function(widget, text)
     text = text:match("0*(%d+)")
     config.staminaValue = text
   end
+end
+
+SuppliesWindow.closePanel.onClick = function()
+  SuppliesWindow:hide()
 end
 
 SuppliesWindow.increment.onClick = function(widget)

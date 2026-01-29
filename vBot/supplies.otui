@@ -27,6 +27,8 @@ SupplySpinBox < SpinBox
   width: 75
   minimum: 0
   maximum: 9999
+  image-color: #828282
+  font: verdana-9px
   text-align: center
   focusable: true
   text: 0
@@ -38,22 +40,26 @@ ItemPanel < Panel
     id: id
     anchors.left: parent.left
     anchors.bottom: parent.bottom
+    image-source: /images/ui/item-blessed
 
   SupplySpinBox
     id: min
     anchors.left: prev.right
     anchors.bottom: parent.bottom
-  
+    font: verdana-9px
+
   SupplySpinBox
     id: max
     anchors.left: prev.right
     anchors.bottom: parent.bottom
+    font: verdana-9px
 
   SupplySpinBox
     id: avg
     anchors.left: prev.right
     anchors.bottom: parent.bottom
     width: 50    
+    font: verdana-9px
 
   UIWidget
     anchors.left: min.left
@@ -62,6 +68,7 @@ ItemPanel < Panel
     text-align: center
     font: verdana-11px-rounded
     text: Min
+    font: verdana-9px-bold
     tooltip: Amount of given supplies for bot to leave the spawn.
 
   UIWidget
@@ -71,6 +78,7 @@ ItemPanel < Panel
     text-align: center
     font: verdana-11px-rounded
     text: Max
+    font: verdana-9px-bold
     tooltip: Amount of given supplies to purchase
 
   UIWidget
@@ -80,31 +88,75 @@ ItemPanel < Panel
     text-align: center
     font: verdana-11px-rounded
     text: AVG
+    font: verdana-9px-bold
     !tooltip: ("This is average consumption of supplies by round to help calculate the amount to purchase\n (info provided by CaveBot Stats)")
 
-SuppliesWindow < MainWindow
-  !text: tr('Supplies')
+SuppliesWindow < UIWindow
+  !text: tr('')
   size: 430 330
+  border: 1 black
+  anchors.centerIn: parent
+  margin-top: -60
   @onEscape: self:hide()
+
+  Panel
+    id: background
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    background-color: black
+    opacity: 0.70
+
+  Panel
+    id: topPanel
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    size: 120 30
+    text-align: center
+    !text: tr('LNS Custom | Supplies vBot Edited')
+    color: orange
+    margin-left: 0
+    margin-right: 0
+    background-color: black
+    $hover:
+      image-color: gray
+
+  UIButton
+    id: closePanel
+    anchors.top: topPanel.top
+    anchors.right: parent.right
+    size: 18 18
+    margin-top: 6
+    margin-right: 10
+    background-color: orange
+    text: X
+    color: white
+    opacity: 1.00
+    $hover:
+      color: black
+      opacity: 0.80
 
   VerticalSeparator
     id: sep
     anchors.top: parent.top
     anchors.right: parent.right
-    margin-right: 140
+    margin-right: 162
     anchors.bottom: bottomSep.top
     margin-bottom: 5
-    margin-left: 10
+    margin-left: 0
     visible: false
 
   Label
     anchors.left: sep.right
     anchors.right: parent.right
     anchors.top: parent.top
-    margin-left: 10
-    margin-top: 3
+    margin-left: 0
+    margin-top: 30
     text-align: center
     text: Additional Conditions:
+    font: verdana-9px
 
   HorizontalSeparator
     anchors.top: prev.bottom
@@ -118,9 +170,15 @@ SuppliesWindow < MainWindow
     anchors.left: sep.right
     anchors.right: parent.right
     margin-top: 5
-    margin-left: 10
+    margin-left: 3
+    margin-right: 5
     text: No Soft
-    tooltip: Go refill if there's no more active soft boots.     
+    tooltip: Go refill if there's no more active soft boots.    
+    font: verdana-9px
+    image-source: /images/ui/button_rounded
+    $on:
+      font: verdana-9px
+      color: green 
 
   BotSwitch
     id: capSwitch
@@ -133,6 +191,11 @@ SuppliesWindow < MainWindow
     text-align: center
     text: Cap Below:
     tooltip: Go refill if capacity is below set value.
+    font: verdana-9px
+    image-source: /images/ui/button_rounded
+    $on:
+      font: verdana-9px
+      color: green 
 
   BotTextEdit
     id: capValue
@@ -141,6 +204,9 @@ SuppliesWindow < MainWindow
     anchors.right: parent.right
     anchors.top: prev.top
     margin-left: 5
+    image-color: #828282
+    font: verdana-9px
+    margin-right: 7
 
   BotSwitch
     id: staminaSwitch
@@ -153,6 +219,11 @@ SuppliesWindow < MainWindow
     text-align: center
     text: Stamina:
     tooltip: Go refill if stamina is below set value. (in minutes)
+    font: verdana-9px
+    image-source: /images/ui/button_rounded
+    $on:
+      font: verdana-9px
+      color: green 
 
   BotTextEdit
     id: staminaValue
@@ -161,6 +232,9 @@ SuppliesWindow < MainWindow
     anchors.right: parent.right
     anchors.top: prev.top
     margin-left: 5
+    image-color: #828282
+    font: verdana-9px
+    margin-right: 7
 
   BotSwitch
     id: imbues
@@ -168,9 +242,15 @@ SuppliesWindow < MainWindow
     anchors.left: sep.right
     anchors.right: parent.right
     margin-top: 5
-    margin-left: 10
+    margin-left: 3
+    margin-right: 5
     text: No Imbues
     tooltip: Go refill when mana leech imbue has worn off.
+    font: verdana-9px
+    image-source: /images/ui/button_rounded
+    $on:
+      font: verdana-9px
+      color: green 
 
   TextList
     id: profiles
@@ -180,14 +260,17 @@ SuppliesWindow < MainWindow
     anchors.right: prev.right
     anchors.bottom: bottomSep.top
     margin-bottom: 25
-  
+    image-color: #828282
+
   BotButton
     id: newProfile
     anchors.left: prev.left
     anchors.top: prev.bottom
     size: 35 15
+    image-source: /images/ui/button_rounded
+    image-color: #828282
     text: New
-    font: cipsoftFont
+    font: verdana-9px
     tooltip: Create new supplies profile.
 
   VerticalScrollBar
@@ -201,6 +284,8 @@ SuppliesWindow < MainWindow
   ScrollablePanel
     id: items
     anchors.top: parent.top
+    margin-top: 30
+    margin-left: 10
     anchors.left: parent.left
     anchors.right: sep.left
     anchors.bottom: bottomSep.top
@@ -214,6 +299,7 @@ SuppliesWindow < MainWindow
     anchors.right: parent.right
     anchors.bottom: closeButton.top
     margin-bottom: 8
+    image-color: black
 
   Button
     id: closeButton
@@ -221,24 +307,32 @@ SuppliesWindow < MainWindow
     font: cipsoftFont
     anchors.right: parent.right
     anchors.bottom: parent.bottom
+    margin-bottom: 5
     size: 45 21
     margin-top: 15   
+    visible: false
+    image-source: /images/ui/button_rounded
+    image-color: #828282
     tooltip: Close supplies window and save settings.
     @onClick: self:getParent():hide()
 
   Button
     id: increment
     anchors.verticalCenter: prev.verticalCenter
-    anchors.right: items.right
+    anchors.left: items.left
     text: +
-    width: 50
+    width: 205
+    image-source: /images/ui/button_rounded
+    image-color: #828282
     tooltip: increase all max supplies amount by average
 
   Button
     id: decrement
     anchors.verticalCenter: prev.verticalCenter
-    anchors.right: prev.left
+    anchors.left: prev.right
     margin-right: 3
     text: -
-    width: 50
+    width: 205
+    image-source: /images/ui/button_rounded
+    image-color: #828282
     tooltip: decrease all max supplies amount by average

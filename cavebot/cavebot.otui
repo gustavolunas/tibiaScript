@@ -18,17 +18,17 @@ CaveBotPanel < Panel
     
   Panel
     id: listPanel
-    height: 100
-    margin-top: 2
+    height: 150
+    margin-top: 0
 
     TextList
       id: list
       anchors.fill: parent
       vertical-scrollbar: listScrollbar
-      margin-right: 15
+      margin-right: 13
       focusable: false
       auto-focus: first
-      
+
     VerticalScrollBar
       id: listScrollbar
       anchors.top: parent.top
@@ -36,23 +36,33 @@ CaveBotPanel < Panel
       anchors.right: parent.right
       pixels-scroll: true
       step: 10
-    
+      
   BotSwitch
     id: showEditor
+    image-source: /images/ui/button_rounded
+    font: verdana-9px
+    image-color: #363636
     margin-top: 2
     
     $on:
-      text: Hide waypoints editor
-      
+      text: HIDE WAYPOINTS EDITOR
+      image-color: #363636
+
     $!on:
-      text: Show waypoints editor
+      text: Show Waypoints Editor
+      image-color: #363636
 
   BotSwitch
     id: showConfig
+    image-source: /images/ui/button_rounded
+    font: verdana-9px
+    image-color: #363636
     margin-top: 2
     
     $on:
-      text: Hide config
-      
+      text: Hide Config
+      image-color: #363636
+
     $!on:
-      text: Show config
+      text: Show Config
+      image-color: #363636

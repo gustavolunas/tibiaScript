@@ -298,7 +298,6 @@ for i, widget in ipairs(slotWidgets) do
         local selfId = widget:getItemId()
         widget:setOn(selfId > 100)
         if widget:isChecked() then
-            widget:setChecked(selfId < 100)
         end
     end
     widget.onMouseRelease = function(widget, mousePos, mouseButton)

@@ -9,26 +9,39 @@ TargetBotLootingPanel < Panel
   Label
     margin-top: 5
     text: Items to loot
+    font: verdana-9px
     text-align: center    
 
   BotContainer
     id: items
+    height: 34
     margin-top: 3
   
   BotSwitch
     id: everyItem
     !text: tr("Loot every item")
     margin-top: 2
+    font: verdana-9px
+    color: white
+    image-source: /images/ui/button_rounded
+    $on:
+      font: verdana-9px
+      color: green
+      image-color: gray
+    $!on:
+      image-color: gray
+      color: white
 
   Label
     margin-top: 5
     text: Containers for loot
     text-align: center
+    font: verdana-9px
 
   BotContainer
     id: containers
     margin-top: 3
-    height: 45
+    height: 34
   
   Panel
     id: maxDangerPanel
@@ -42,12 +55,14 @@ TargetBotLootingPanel < Panel
       anchors.bottom: parent.bottom
       margin-right: 6
       width: 80
-
+      image-color: #828282
+      font: verdana-9px
     Label
       anchors.left: parent.left
       anchors.verticalCenter: prev.verticalCenter
       text: Max. danger:
       margin-left: 5
+      font: verdana-9px
 
   Panel
     id: minCapacityPanel
@@ -61,9 +76,11 @@ TargetBotLootingPanel < Panel
       anchors.bottom: parent.bottom
       margin-right: 6
       width: 80
-
+      image-color: #828282
+      font: verdana-9px
     Label
       anchors.left: parent.left
       anchors.verticalCenter: prev.verticalCenter
       text: Min. capacity:
       margin-left: 5
+      font: verdana-9px

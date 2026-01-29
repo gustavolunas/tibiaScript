@@ -16,12 +16,14 @@ TargetBotDualLabel < Panel
     anchors.top: parent.top
     anchors.left: parent.left
     text-auto-resize: true
+    font: verdana-9px
 
   Label
     id: right
     anchors.top: parent.top
     anchors.right: parent.right
     text-auto-resize: true
+    font: verdana-9px
 
 TargetBotPanel < Panel
   layout:
@@ -43,7 +45,7 @@ TargetBotPanel < Panel
 
   Panel
     id: listPanel
-    height: 40
+    height: 100
 
     TextList
       id: list
@@ -63,17 +65,21 @@ TargetBotPanel < Panel
       
   BotSwitch
     id: configButton
+    image-source: /images/ui/button_rounded
+    font: verdana-9px
     @onClick: |
       self:setOn(not self:isOn())
-      self:getParent().listPanel:setHeight(self:isOn() and 100 or 40)
+      self:getParent().listPanel:setHeight(self:isOn() and 100 or 100)
       self:getParent().editor:setVisible(self:isOn())
 
     $on:
       text: Hide target editor
+      image-color: #363636
 
     $!on:
       text: Show target editor
-  
+      image-color: #363636
+
   Panel
     id: editor
     visible: false
@@ -91,25 +97,54 @@ TargetBotPanel < Panel
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        text: Add
-        width: 56
+        text: ADD
+        color: white
+        font: verdana-9px
+        image-source: /images/ui/button_rounded
+        image-color: #828282
+        width: 48
+        height: 20
+        border: 1 alpha
+        $hover:
+          opacity: 0.95
 
       Button
         id: edit
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        text: Edit
-        width: 56
+        text: EDIT
+        color: white
+        font: verdana-9px
+        image-source: /images/ui/button_rounded
+        image-color: #828282
+        width: 48
+        height: 20
+        border: 1 alpha
+        $hover:
+          opacity: 0.95
 
       Button
         id: remove
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.right: parent.right
-        text: Remove
-        width: 56
+        text: REMOVE
+        color: white
+        font: verdana-9px
+        image-source: /images/ui/button_rounded
+        image-color: #828282
+        width: 48
+        height: 20
+        border: 1 alpha
+        $hover:
+          opacity: 0.95
     
     BotSwitch
       id: debug
+      color: white
+      font: verdana-9px
+      visible: false
+      image-source: /images/ui/button_rounded
+      image-color: #363636
       text: Show target priority
