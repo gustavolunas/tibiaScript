@@ -7,12 +7,6 @@ Panel
   height: 60
   margin-top: 0
 
-  HorizontalSeparator
-    id: sep1
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top: parent.top
-
   Label
     id: textLabel2
     anchors.left: parent.left
@@ -141,4 +135,5 @@ local function updateButtonsBot()
     modules.game_bot.botWindow:setImageColor("white")
     modules.game_bot.botWindow:setBorderColor("alpha")
 end
+
 updateButtonsBot()
