@@ -54,7 +54,7 @@ end
 comboInterface = setupUI([[
 UIWindow
   id: mainPanel
-  size: 400 360
+  size: 400 400
   border: 1 black
   anchors.centerIn: parent
   margin-top: -60
@@ -229,7 +229,7 @@ UIWindow
     margin-top: 8
     margin-right: 8
     margin-left: 8
-    height: 60
+    height: 180
     image-color: #363636
     layout: verticalBox
 
@@ -242,7 +242,6 @@ UIWindow
     font: verdana-9px-italic
     margin-top: -5
     margin-left: 10
-
 
   CheckBox
     id: virarTarget
@@ -266,51 +265,10 @@ UIWindow
     color: gray
     margin-top: 10
 
-  FlatPanel
-    id: panelSafe
-    anchors.top: panelTools.bottom
-    anchors.right: parent.right
-    anchors.left: parent.left
-    margin-top: 8
-    margin-right: 8
-    margin-left: 8
-    height: 80
-    image-color: #363636
-    layout: verticalBox
-
-  Label
-    id: labelSafe
-    anchors.top: prev.top
-    anchors.left: panelMain.left
-    text: SAFE ZONE:
-    text-auto-resize: true
-    font: verdana-9px-italic
-    margin-top: -5
-    margin-left: 10
-      
-  CheckBox
-    id: CheckStairs
-    anchors.top: labelSafe.bottom
-    anchors.left: labelSafe.left
-    text: Checar Stairs
-    text-auto-resize: true
-    font: verdana-11px-rounded
-    image-source: /images/ui/checkbox_round
-    color: gray
-    margin-top: 10
-
-  Panel
-    id: idsSafeAndares
-    anchors.top: prev.top
-    anchors.left: CheckStairs.right
-    margin-top: -10
-    margin-left: 13
-    size: 250 35
-
   CheckBox
     id: IgnoreParty
-    anchors.top: CheckStairs.bottom
-    anchors.left: CheckStairs.left
+    anchors.top: prev.bottom
+    anchors.left: prev.left
     text: Checar Players
     text-auto-resize: true
     font: verdana-11px-rounded
@@ -329,27 +287,49 @@ UIWindow
     color: gray
     margin-top: 10
 
+  CheckBox
+    id: CheckStairs
+    anchors.top: stopOnPk.bottom
+    anchors.left: stopOnPk.left
+    text: Checar Stairs
+    text-auto-resize: true
+    font: verdana-11px-rounded
+    image-source: /images/ui/checkbox_round
+    color: gray
+    margin-top: 10
+
   Label
     id: labelSqm
-    anchors.top: prev.top
+    anchors.top: virarTarget.top
     anchors.left: prev.right
     text: Safe SQM:
     text-auto-resize: true
+    margin-top: -5
     font: verdana-11px-rounded
     margin-left: 147
     color: gray
     
   SpinBox
     id: sqmSafe
-    anchors.top: prev.top
+    anchors.top: virarTarget.top
     anchors.left: prev.right
     size: 50 20
-    margin-top: -5
+    margin-top: -10
     image-color: gray
     minimum: 1
-    maximum: 10
+    maximum: 8
     step: 1
     text-align: center
+
+  Panel
+    id: idsSafeAndares
+    anchors.top: CheckStairs.bottom
+    anchors.left: CheckStairs.left
+    anchors.right: parent.right
+    anchors.bottom: panelTools.bottom
+    margin-right: 15
+    margin-top: -3
+    height: 74
     
 ]], g_ui.getRootWidget())
 comboInterface:hide();
@@ -768,27 +748,8 @@ UIWindow
 ]], g_ui.getRootWidget())
 runeAddPanel:hide()
 
--- =========================================================
--- COMBO PANEL (SPELL + RUNE) - STORAGE GLOBAL (SEM JSON)
--- - 2 AddPanels: spellAddPanel / runeAddPanel
--- - spellList: CheckBox enable + icone (runa) OU nome da spell
--- - Botao X no fim da linha para deletar
--- - Clique seleciona (focus), duplo clique edita (abre painel correto)
--- - MoveUp/MoveDown reordena (swap no storage)
--- - SafeIdsAndares via UI.Container (global)
---
--- + AUTO COOLDOWN:
---   - Spell: calcula via onTalk (speak 2x) pelo botão "!"
---   - Rune: calcula via missile e aprende missileId automaticamente
---   - FIX IMPORTANTE: setValue() do ScrollBar pode NAO disparar onValueChange
---     então salvamos em cfg.draft + chamamos onValueChange manualmente.
--- =========================================================
-
 local STORAGE_KEY = "combo_actions_global_v1"
 
--- =========================================================
--- UTIL
--- =========================================================
 local function deepCopy(t)
   if type(t) ~= "table" then return t end
   local r = {}
@@ -839,7 +800,6 @@ local function nowMs()
   return (os.time() * 1000) + math.floor((os.clock() * 1000) % 1000)
 end
 
--- tenta pegar sprite de item (OTCv8 costuma ter g_things)
 local function setItemIcon(widget, itemId)
   if not widget then return end
   itemId = tonumber(itemId)
@@ -857,9 +817,6 @@ local function setItemIcon(widget, itemId)
   end
 end
 
--- =========================================================
--- DEFAULT CFG
--- =========================================================
 local function defaultCfg()
   return {
     main = {
@@ -876,7 +833,7 @@ local function defaultCfg()
       -- { type="spell", enabled=true, spell="exori gran", dist=3, mana=200, mobs=2, cd=1200, safe=true }
       -- { type="rune",  enabled=true, runeId=3155,        dist=7, mana=0,   mobs=1, cd=800,  safe=false }
     },
-    -- cache do formulário (não depende de onValueChange do scrollbar)
+
     draft = {
       spell = { cd = 0 },
       rune  = { cd = 0 },
@@ -896,7 +853,6 @@ local function mergeDefaults(dst, def)
   return dst
 end
 
--- init storage global
 storage[STORAGE_KEY] = mergeDefaults(storage[STORAGE_KEY], defaultCfg())
 local cfg = storage[STORAGE_KEY]
 
@@ -906,7 +862,6 @@ cfg.draft = cfg.draft or { spell = { cd = 0 }, rune = { cd = 0 } }
 cfg.draft.spell = cfg.draft.spell or { cd = 0 }
 cfg.draft.rune  = cfg.draft.rune  or { cd = 0 }
 
--- migração simples (se você tinha cfg.spells antes)
 if cfg.spells and type(cfg.spells) == "table" and #cfg.actions == 0 then
   for _, sp in ipairs(cfg.spells) do
     table.insert(cfg.actions, {
@@ -923,14 +878,10 @@ if cfg.spells and type(cfg.spells) == "table" and #cfg.actions == 0 then
   cfg.spells = nil
 end
 
--- =========================================================
--- UI refs (assume que comboInterface/spellAddPanel/runeAddPanel já existem)
--- =========================================================
 local ui   = comboInterface
 local spUI = spellAddPanel
 local rnUI = runeAddPanel
 
--- main widgets
 local spellList   = ui.spellList
 local addSpellBtn = ui.adicionarSpell
 local addRuneBtn  = ui.adicionarRuna
@@ -946,7 +897,6 @@ local stopOnPk    = ui.stopOnPk
 local sqmSafe     = ui.sqmSafe
 local idsSafePanel= ui.idsSafeAndares
 
--- spell panel widgets
 local sp_spell    = W(spUI, "magia")
 local sp_dist     = W(spUI, "distance")
 local sp_mana     = W(spUI, "mana")
@@ -961,7 +911,6 @@ local sp_mbLbl    = W(spUI, "mobsLabel")
 local sp_cdLbl    = W(spUI, "cdLabel")
 local sp_calcBtn  = W(spUI, "calculeCooldown")
 
--- rune panel widgets
 local rn_id       = W(rnUI, "runa")
 local rn_dist     = W(rnUI, "distance")
 local rn_mobs     = W(rnUI, "mobs")
@@ -974,9 +923,6 @@ local rn_mbLbl    = W(rnUI, "mobsLabel")
 local rn_cdLbl    = W(rnUI, "cdLabel")
 local rn_calcBtn  = W(rnUI, "calculeCooldown")
 
--- =========================================================
--- Safe IDs container
--- =========================================================
 local idsSafeContainer = UI.Container(function(_, items)
   if type(items) ~= "table" then items = {} end
   cfg.main.safeIdsAndares = items
@@ -987,9 +933,6 @@ idsSafeContainer:fill('parent')
 idsSafeContainer:setOpacity(0.60)
 idsSafeContainer:setItems(cfg.main.safeIdsAndares)
 
--- =========================================================
--- Row template
--- =========================================================
 local rowTemplate = [[
 UIWidget
   id: root
@@ -1077,9 +1020,6 @@ UIWidget
     image-source: /images/ui/button_rounded
 ]]
 
--- =========================================================
--- Labels update
--- =========================================================
 local function updateSpellPanelLabels()
   if sp_dLbl and sp_dist then sp_dLbl:setText("DISTANCE: " .. (sp_dist:getValue() or 0)) end
   if sp_mLbl and sp_mana then sp_mLbl:setText("MANA: " .. (sp_mana:getValue() or 0)) end
@@ -1099,9 +1039,6 @@ local function updateRunePanelLabels()
   end
 end
 
--- =========================================================
--- Reset forms
--- =========================================================
 local function resetSpellForm()
   if sp_spell then sp_spell:setText("") end
   if sp_dist then sp_dist:setValue(1) end
@@ -1123,9 +1060,6 @@ local function resetRuneForm()
   updateRunePanelLabels()
 end
 
--- =========================================================
--- ScrollBar binds (SALVA SEMPRE no draft)
--- =========================================================
 if sp_dist then sp_dist.onValueChange = function() updateSpellPanelLabels() end end
 if sp_mana then sp_mana.onValueChange = function() updateSpellPanelLabels() end end
 if sp_mobs then sp_mobs.onValueChange = function() updateSpellPanelLabels() end end
@@ -1153,9 +1087,6 @@ if rn_cd then
   end
 end
 
--- =========================================================
--- Selection helpers
--- =========================================================
 local function getSelectedIndex()
   local focused = spellList and spellList:getFocusedChild() or nil
   if not focused then return nil end
@@ -1164,9 +1095,6 @@ end
 
 local editingIndex = nil -- index dentro de cfg.actions
 
--- =========================================================
--- Refresh list
--- =========================================================
 local function refreshList()
   if not spellList then return end
   clearChildren(spellList)
@@ -1179,21 +1107,18 @@ local function refreshList()
     local row = setupUI(rowTemplate, spellList)
     row.entryIndex = i
 
-    -- Enable/Disable
     row.enabled:setChecked(entry.enabled and true or false)
     row.enabled.onClick = function()
       entry.enabled = not entry.enabled
       row.enabled:setChecked(entry.enabled)
     end
 
-    -- Remove
     row.remove.onClick = function()
       table.remove(cfg.actions, row.entryIndex)
       editingIndex = nil
       refreshList()
     end
 
-    -- Conteúdo principal
     if entry.type == "rune" then
       row.spellName:setText("   ")
       row.spellName:setVisible(true)
@@ -1206,13 +1131,11 @@ local function refreshList()
       row.spellName:setText(tostring(entry.spell or ""))
     end
 
-    -- Dist/Mobs
     local dist = tonumber(entry.dist or 0) or 0
     local mobs = tonumber(entry.mobs or 0) or 0
     row.distText:setText(string.format("[%d Sqm Range | ", dist))
     row.mobsText:setText(string.format("+%d Creature]", mobs))
 
-    -- SAFE com cor
     local safeChar  = entry.safe and "SAFE" or "UNSAFE"
     local safeColor = entry.safe and "#00FF00" or "#FF4040"
     if row.safeText.setColoredText then
@@ -1222,7 +1145,6 @@ local function refreshList()
       row.safeText:setColor(safeColor)
     end
 
-    -- Tooltip
     local tip = ""
     if entry.type == "spell" then
       tip = string.format(
@@ -1289,9 +1211,6 @@ local function refreshList()
   end
 end
 
--- =========================================================
--- Move up/down
--- =========================================================
 upBtn.onClick = function()
   local idx = getSelectedIndex()
   if not idx or idx < 2 then return end
@@ -1310,9 +1229,6 @@ downBtn.onClick = function()
   if newFocus then spellList:focusChild(newFocus) end
 end
 
--- =========================================================
--- Main toggles -> cfg
--- =========================================================
 if offHealing then
   offHealing:setOn(cfg.main.enabled and true or false)
   offHealing.onClick = function(w) cfg.main.enabled = w:isOn() end
@@ -1345,9 +1261,6 @@ if sqmSafe then
   end
 end
 
--- =========================================================
--- Open add panels
--- =========================================================
 addSpellBtn.onClick = function()
   editingIndex = nil
   resetSpellForm()
@@ -1365,9 +1278,6 @@ end
 sp_cancel.onClick = function() spUI:hide() comboInterface:show() end
 rn_cancel.onClick = function() rnUI:hide() comboInterface:show() end
 
--- =========================================================
--- Add spell
--- =========================================================
 sp_add.onClick = function()
   local spell = trim(sp_spell and sp_spell:getText() or "")
   if isEmpty(spell) then return warn("[Combo] Preencha o campo SPELL.") end
@@ -1397,9 +1307,6 @@ sp_add.onClick = function()
   comboInterface:show()
 end
 
--- =========================================================
--- Add rune
--- =========================================================
 rn_add.onClick = function()
   local runeId = tonumber(trim(rn_id and rn_id:getText() or ""))
   if not runeId or runeId <= 0 then return warn("[Combo] ID da runa invalido.") end
@@ -1429,9 +1336,6 @@ rn_add.onClick = function()
   comboInterface:show()
 end
 
--- =========================================================
--- INIT UI state
--- =========================================================
 spUI:hide()
 rnUI:hide()
 resetSpellForm()
@@ -1451,7 +1355,6 @@ end
 
 resetRuntimeCooldowns()
 
--- quando troca de char / reconecta
 if g_game and connect then
   connect(g_game, {
     onGameStart = function()
@@ -1460,9 +1363,6 @@ if g_game and connect then
   })
 end
 
--- =========================
--- ANTI RED
--- =========================
 local function showMessage(msg)
     if modules and modules.game_textmessage and modules.game_textmessage.displayGameMessage then
       modules.game_textmessage.displayGameMessage(msg)
@@ -1529,21 +1429,18 @@ macro(200, function()
   if not ui or not ui.stopOnPk or not ui.stopOnPk.isChecked then return end
 
   if not ui.stopOnPk:isChecked() then
-    -- se desligou o sistema, restaura tudo
     restoreUnsafeActions()
     return
   end
 
   local frag = iAmFrag()
 
-  -- se pegou skull e ainda não desligou nada, desliga
   if frag and (#cfg.main.disabledByFrag == 0) then
     disableUnsafeActions()
     skullDropAt = 0
     return
   end
 
-  -- se já desligou, espera ficar safe pra restaurar (ou morte)
   if #cfg.main.disabledByFrag > 0 then
     if iAmDead() then
       restoreUnsafeActions()
@@ -1562,12 +1459,8 @@ macro(200, function()
   end
 end)
 
--- garante que ao carregar o script ele não fique preso desativado
 restoreUnsafeActions()
 
--- -------------------------
--- SPELL CD (por onTalk)
--- -------------------------
 local cdSpell = { active=false, spell="", lastTime=0 }
 
 local function stopSpellCalc()
@@ -1623,13 +1516,6 @@ if sp_calcBtn then
   end
 end
 
--- -------------------------
--- RUNE CD (por MISSILE) + aprende missileId automaticamente
--- -------------------------
--- =========================================================
--- RUNE COOLDOWN - MISSILE ONLY (SEM FALLBACK)
--- =========================================================
-
 cfg.draft = cfg.draft or {}
 cfg.draft.rune = cfg.draft.rune or { cd = 0 }
 
@@ -1657,10 +1543,8 @@ local function applyRuneCd(ms)
   if ms < 0 then ms = 0 end
   if ms > 60000 then ms = 60000 end
 
-  -- salva no storage
   cfg.draft.rune.cd = ms
 
-  -- aplica no painel
   local rn_cd = runeAddPanel and W(runeAddPanel, "cooldown")
   if rn_cd and rn_cd.setValue then
     rn_cd:setValue(ms)
@@ -1674,9 +1558,6 @@ local function applyRuneCd(ms)
   stopRuneCd()
 end
 
--- =========================================================
--- TRY USE (APENAS useWith) + FORCADO
--- =========================================================
 local function tryUseRune(runeId)
   local target = g_game.getAttackingCreature()
   if not target then target = g_game.getLocalPlayer() end
@@ -1695,12 +1576,6 @@ local function tryUseRune(runeId)
   return ok
 end
 
--- =========================================================
--- [INSERIDO] AUTO USAR RUNA 2x (FORCANDO TENTATIVAS)
--- - tenta soltar o 1o missile
--- - quando pegar o 1o missile, começa a forcar o 2o missile
--- - para sozinho quando applyRuneCd() rodar
--- =========================================================
 local runeAuto = {
   active = false,
   runeId = 0,
@@ -1721,12 +1596,10 @@ macro(60, function()
   if not runeAuto.active then return end
   if runeAuto.runeId <= 0 then runeAuto.active = false; return end
 
-  -- se o calc acabou, para o auto junto
   if not runeCd.active then runeAuto.active = false; return end
 
   local t = nowMs()
 
-  -- timeout pra nao ficar infinito (ex: sem missile no servidor)
   if t - runeAuto.startedAt > 20000 then
     warn("[CD-RUNE] Timeout: nao consegui medir (sem 2 missiles).")
     runeAuto.active = false
@@ -1735,25 +1608,19 @@ macro(60, function()
 
   if runeAuto.nextAt ~= 0 and t < runeAuto.nextAt then return end
 
-  -- intervalo de tentativa (nao spammar demais)
   runeAuto.nextAt = t + 250
 
-  -- stage 1: forca sair o 1o missile (ate runeCd.missileId ser aprendido)
   if runeAuto.stage == 1 then
     tryUseRune(runeAuto.runeId)
     return
   end
 
-  -- stage 2: forca sair o 2o missile (ate applyRuneCd disparar)
   if runeAuto.stage == 2 then
     tryUseRune(runeAuto.runeId)
     return
   end
 end)
 
--- =========================================================
--- MISSILE HANDLER
--- =========================================================
 local function handleRuneMissile(missile)
   if not runeCd.active or not missile then return end
 
@@ -1777,12 +1644,10 @@ local function handleRuneMissile(missile)
 
   local t = nowMs()
 
-  -- primeiro missile → aprende missileId
   if not runeCd.missileId then
     runeCd.missileId = mid
     runeCd.lastTime = t
 
-    -- [INSERIDO] assim que pegar o 1o missile, começa a forcar o 2o
     if runeAuto.active then
       runeAuto.stage = 2
       runeAuto.nextAt = 0
@@ -1790,19 +1655,13 @@ local function handleRuneMissile(missile)
     return
   end
 
-  -- ignora missiles diferentes
   if mid ~= runeCd.missileId then return end
 
-  -- segundo missile → calcula CD
   if runeCd.lastTime > 0 then
     applyRuneCd(t - runeCd.lastTime)
-    -- applyRuneCd -> stopRuneCd() -> runner para sozinho
   end
 end
 
--- =========================================================
--- HOOKS DE MISSILE (compatibilidade total)
--- =========================================================
 if type(onMissile) == "function" then
   pcall(function()
     onMissile(handleRuneMissile)
@@ -1825,9 +1684,7 @@ if g_map and connect then
   end)
 end
 
--- =========================================================
--- BOTÃO "!" DO PAINEL
--- =========================================================
+
 do
   local btn = runeAddPanel and W(runeAddPanel, "calculeCooldown")
   if btn then
@@ -1843,7 +1700,6 @@ do
       runeCd.active = true
       runeCd.runeId = runeId
 
-      -- [INSERIDO] força 2 usos (via tentativas + missile)
       startAutoRune2x(runeId)
 
       warn("[CD-RUNE] Aguardando missile...")
@@ -1851,9 +1707,6 @@ do
   end
 end
 
--- =========================================================
--- LOAD DO COOLDOWN AO ABRIR O PAINEL
--- =========================================================
 do
   local rn_cd = runeAddPanel and W(runeAddPanel, "cooldown")
   if rn_cd and rn_cd.setValue then
@@ -1864,12 +1717,6 @@ do
   end
 end
 
-
-
-
--- =========================================================
--- CHECK STAIRS + TEXTO "UNSAFE" SIMPLES
--- =========================================================
 ANDAR_NAO_SAFE = false
 
 local function buildIdLookup(ids)
@@ -1930,56 +1777,6 @@ macro(300, function()
   end
 end)
 
--- =========================================================
--- CHECK PLAYERS (usa IGNORE PARTY + range sqmSafe)
--- =========================================================
-PLAYERSINSCREEN = false
-
-macro(200, function()
-  if not ui or not ui.IgnoreParty or not ui.IgnoreParty.isChecked then
-    PLAYERSINSCREEN = false
-    return
-  end
-
-  local player = g_game.getLocalPlayer()
-  if not player then return end
-
-  if not ui.IgnoreParty:isChecked() then
-    PLAYERSINSCREEN = false
-    return
-  end
-
-  local range = 8
-  if cfg and cfg.main then
-    range = clamp(cfg.main.sqmSafe, 1, 10)
-  elseif ui.sqmSafe and ui.sqmSafe.getValue then
-    range = clamp(ui.sqmSafe:getValue(), 1, 10)
-  end
-
-  local foundEnemy = false
-  local spectators = getSpectators() or {}
-
-  for _, spec in ipairs(spectators) do
-    if spec and spec:isPlayer() and not spec:isLocalPlayer() then
-      local dist = getDistanceBetween(player:getPosition(), spec:getPosition())
-      if dist <= range then
-        if not (spec:isPartyMember() or (spec.getShield and spec:getShield() > 0)) then
-          if not (spec.getEmblem and spec:getEmblem() == 1) then
-            foundEnemy = true
-            break
-          end
-        end
-      end
-    end
-  end
-
-  PLAYERSINSCREEN = foundEnemy
-
-end)
-
--- =========================================================
--- KEEP DISTANCE (só com checkbox manterDist)
--- =========================================================
 local lastMove = 0
 local moveDelay = 25
 local lastDir = nil
@@ -2072,9 +1869,6 @@ macro(200, function()
   if nowt > stableUntil then lastDir = nil end
 end)
 
--- =========================================================
--- VIRAR PARA O TARGET (fast 4-dir) - checkbox virarTarget
--- =========================================================
 local lastTurn = 0
 local turnDelay = 20
 
@@ -2120,15 +1914,6 @@ macro(30, function()
   lastTurn = nowt
 end)
 
--- ===========================================================
-
-
--- =========================================================
--- MOTOR DE COMBATE (LNS ENGINE) - LÓGICA INVERTIDA
--- Checkbox MARCADO = Magia Segura (Usa sempre)
--- Checkbox DESMARCADO = Magia Perigosa (Bloqueia se houver perigo)
--- =========================================================
-
 local runeToMissile = {
     [3155] = 32,  -- SD
     [3175] = 20,
@@ -2137,9 +1922,6 @@ local runeToMissile = {
     [3202] = 25
 }
 
--- =========================================================
--- 1. DETECTOR DE MAGIAS (PRECISÃO EXATA)
--- =========================================================
 onTalk(function(name, level, mode, text, channelId, pos)
     if name ~= g_game.getLocalPlayer():getName() then return end
     text = text:lower()
@@ -2155,9 +1937,6 @@ onTalk(function(name, level, mode, text, channelId, pos)
     end
 end)
 
--- =========================================================
--- 2. DETECTOR DE RUNAS (PRECISÃO EXATA)
--- =========================================================
 onMissle(function(missle)
     local player = g_game.getLocalPlayer()
     if not player then return end
@@ -2186,10 +1965,78 @@ onMissle(function(missle)
     end
 end)
 
--- =========================================================
--- 3. MACRO DE COMBO REFEITO (MOTOR)
--- =========================================================
-local SPAM_DELAY = 50 -- Tempo de espera "provisório" até o servidor responder
+PLAYERSINSCREEN = false
+
+local function clampValue(v, mn, mx)
+  v = tonumber(v) or mn
+  if v < mn then return mn end
+  if v > mx then return mx end
+  return v
+end
+
+local function isPartyMemberSafe(spec)
+  if spec.isPartyMember and spec:isPartyMember() then return true end
+  if spec.getShield then
+    local sh = spec:getShield()
+    if sh and sh > 0 then return true end
+  end
+  return false
+end
+
+local function isGuildMemberSafe(spec)
+  return (spec.getEmblem and spec:getEmblem() == 1) or false
+end
+
+macro(200, function()
+  -- seu toggle real é ignoreParty (checkbox id IgnoreParty = "Checar Players")
+  local enabledCheck = false
+  if ui and ui.IgnoreParty and ui.IgnoreParty.isChecked then
+    enabledCheck = ui.IgnoreParty:isChecked()
+  elseif cfg and cfg.main then
+    enabledCheck = cfg.main.ignoreParty == true
+  end
+
+  if not enabledCheck then
+    PLAYERSINSCREEN = false
+    return
+  end
+
+  local me = g_game.getLocalPlayer()
+  if not me then return end
+  local myPos = me:getPosition()
+  if not myPos then return end
+
+  local range = clampValue((cfg and cfg.main and cfg.main.sqmSafe) or 8, 1, 8)
+
+  local enemyFound = false
+  local specs = {}
+
+  if g_map and g_map.getSpectators then
+    specs = g_map.getSpectators(myPos, false) or {}
+  else
+    -- fallback bem simples
+    specs = getSpectators(false) or {}
+  end
+
+  for _, spec in ipairs(specs) do
+    if spec and spec:isPlayer() and not spec:isLocalPlayer() then
+      local sp = spec:getPosition()
+      if sp and sp.z == myPos.z then
+        local dist = getDistanceBetween(myPos, sp)
+        if dist <= range then
+          if not isPartyMemberSafe(spec) and not isGuildMemberSafe(spec) then
+            enemyFound = true
+            break
+          end
+        end
+      end
+    end
+  end
+
+  PLAYERSINSCREEN = enemyFound
+end)
+
+local SPAM_DELAY = 50 
 
 macro(100, function()
     if not storage[switchCombo].enabled then return end
@@ -2201,26 +2048,20 @@ macro(100, function()
     if not player or not target then return end
     if player:isNpc() then return end
 
-    -- Segurança PK (opcional - Só para se stopOnPk estiver ATIVADO e alvo for PLAYER)
     if cfg.main.stopOnPk and target:isPlayer() then return end
 
     local pPos = player:getPosition()
     local tPos = target:getPosition()
     
-    -- Se não tiver posição válida ou andar diferente, aborta
     if not pPos or not tPos or pPos.z ~= tPos.z then return end
 
     local dist = math.max(math.abs(pPos.x - tPos.x), math.abs(pPos.y - tPos.y))
 
-    -- LOOP PELA LISTA DE AÇÕES
     for i, action in ipairs(cfg.actions) do
         if action.enabled then
             
-            -- 1. Checagem de Cooldown (Baseada no onTalk/onMissle)
-            -- Se 'nextCast' não existir, assume que está pronto (0)
             local isReady = now >= (action.nextCast or 0)
 
-            -- 2. Checagens de Distância e Mana
             local distOk = dist <= (action.dist or 8)
             
             local manaOk = true
@@ -2229,7 +2070,6 @@ macro(100, function()
                 if mana() < needMana then manaOk = false end
             end
 
-            -- 3. Checagem de Mobs (Ao Redor)
             local mobsOk = true
             if (action.mobs or 0) > 0 then
                 local count = 0
@@ -2244,20 +2084,18 @@ macro(100, function()
                 if count < action.mobs then mobsOk = false end
             end
 
-            -- 4. LÓGICA SAFE (Safe Checkbox)
-            -- Checkbox MARCADO = SAFE (Pode usar sempre)
-            -- Checkbox DESMARCADO = UNSAFE (Verifica perigos)
             local safeOk = true
-            
-            if not action.safe then -- Se for magia PERIGOSA
-                -- Verifica variáveis globais (que vem do seu outro script)
-                if cfg.main.checkStairs and ANDAR_NAO_SAFE then safeOk = false end
-                if cfg.main.checkPlayers and PLAYERSINSCREEN then safeOk = false end
+
+            if not action.safe then
+              if cfg.main.checkStairs and ANDAR_NAO_SAFE then
+                safeOk = false
+              end
+
+              if cfg.main.ignoreParty and PLAYERSINSCREEN then
+                safeOk = false
+              end
             end
 
-            -- ====================================================
-            -- EXECUÇÃO
-            -- ====================================================
             if isReady and distOk and manaOk and mobsOk and safeOk then
                 
                 if action.type == "spell" then
