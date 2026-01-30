@@ -3,7 +3,6 @@ UI.Separator()
 local iconUtilitys = setupUI([[
 Panel
   height: 17
-  margin-top: 2
 
   Button
     id: settings
@@ -265,6 +264,18 @@ manaText = addTextEdit("Mana Train", storage.manaTrainText, function(widget, tex
 createBotSwitch("default", destRight, "Mana Train", storage.utilityToggles, "manaTrain")
 
 local function getNextBpIdList() local ids = {} for _, entry in pairs(storage.proximaBpID or {}) do table.insert(ids, entry.id or entry) end return ids end
+
+macro(500, function()
+  if storage.utilityToggles["dancingMode"] ~= true then return end
+    turn(math.random(0,3))
+end)
+
+macro(500, function()
+    posToHold = posToHold or pos()
+    schedule(50, function() if storage.utilityToggles["holdPosition"] ~= true then posToHold = nil end end) 
+    if table.equals(posToHold, pos()) then return end
+    autoWalk(posToHold, 127, {ignoreNonPathable=true, precision=2, ignoreStairs=true})
+end)
 
 local function trim(s)
   return (s:gsub("^%s+", ""):gsub("%s+$", ""))
