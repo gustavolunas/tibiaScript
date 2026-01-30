@@ -328,7 +328,7 @@ UIWindow
     anchors.right: parent.right
     anchors.bottom: panelTools.bottom
     margin-right: 15
-    margin-top: -3
+    margin-top: 5
     height: 74
     
 ]], g_ui.getRootWidget())
@@ -2117,3 +2117,4 @@ macro(100, function()
         end
     end
 end)
+
