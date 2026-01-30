@@ -341,4 +341,7 @@ onAttackingCreatureChange(function(creature, OldCreature)
         CaveBot.Conversation("hi", "sail")
         CaveBot.Conversation("hi", "trade")
     end
+
 end)
+
+UI.Separator()
