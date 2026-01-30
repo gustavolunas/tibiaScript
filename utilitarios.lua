@@ -252,12 +252,12 @@ potionText = addTextEdit("mi", storage.mi or "23373", function(widget, text) if 
 createBotSwitch("default", destLeft, "Mana Train ED/MS", storage.utilityToggles, "manaTrainMage")
 
 -- LADO DIREITO
-local nextBpContainer = UI.Container(function(widget, items) storage.proximaBpID = items end, true, destRight) nextBpContainer:setHeight(32) nextBpContainer:setItems(storage.proximaBpID)
+local nextBpContainer = UI.Container(function(widget, items) storage.proximaBpID = items end, true, destRight) nextBpContainer:setHeight(46) nextBpContainer:setItems(storage.proximaBpID)
 createBotSwitch("default", destRight, "Abrir Proxima BP", storage.utilityToggles, "proximaBP")
-local transformCoin = UI.Container(function(widget, items) storage.transformarCoin = items end, true, destRight) transformCoin:setHeight(32) transformCoin:setItems(storage.transformarCoin) transformCoin:setMarginTop(4)
+local transformCoin = UI.Container(function(widget, items) storage.transformarCoin = items end, true, destRight) transformCoin:setHeight(46) transformCoin:setItems(storage.transformarCoin) transformCoin:setMarginTop(4)
 createBotSwitch("default", destRight, "Transformar Coin", storage.utilityToggles, "transformCoin")
 UI.Separator(destRight)
-local doorContainer = UI.Container(function(widget, items) storage.doorIds = items doorId = properTable(storage.doorIds) end, true, destRight) doorContainer:setHeight(32) doorContainer:setItems(storage.doorIds) doorId = properTable(storage.doorIds)
+local doorContainer = UI.Container(function(widget, items) storage.doorIds = items doorId = properTable(storage.doorIds) end, true, destRight) doorContainer:setHeight(46) doorContainer:setItems(storage.doorIds) doorId = properTable(storage.doorIds)
 createBotSwitch("default", destRight, "Abrir Portas", storage.utilityToggles, "abrirPortas")
 UI.Separator(destRight)
 manaText = addTextEdit("Mana Train", storage.manaTrainText, function(widget, text) storage.manaTrainText = text end, destRight) manaText:setImageColor("#828282") manaText:setMarginLeft(1) manaText:setMarginRight(2) manaText:setFont("verdana-9px")  manaText:setHeight(18)
