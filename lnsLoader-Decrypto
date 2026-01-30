@@ -1,6 +1,10 @@
+if storage and storage.scriptsCache then
+  storage.scriptsCache = nil
+end
+
 local baseUrl = "https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/master/"
 
-local macros = {
+local files = {
   "main",
   "combo",
   "healing",
@@ -13,33 +17,72 @@ local macros = {
   "icons"
 }
 
-local index = 1
+-- cache só em memória (some ao fechar o client)
+local memCache = {} -- [name] = scriptText
 
-local function loadNext()
-  local file = macros[index]
-  if not file then
+local function later(fn, ms)
+  if type(scheduleEvent) == "function" then
+    return scheduleEvent(fn, ms)
+  end
+  if g_dispatcher and type(g_dispatcher.scheduleEvent) == "function" then
+    return g_dispatcher:scheduleEvent(fn, ms)
+  end
+  return fn()
+end
+
+local function isUiReady()
+  if not g_game or not g_game.isOnline or not g_game:isOnline() then return false end
+  if not g_ui or type(g_ui.getRootWidget) ~= "function" then return false end
+  local root = g_ui.getRootWidget()
+  if not root then return false end
+  return root:recursiveGetChildById("gameRootPanel") ~= nil
+      or root:recursiveGetChildById("gameInterface") ~= nil
+end
+
+local pending = #files
+local started = false
+
+local function runAllInOrder()
+  if started then return end
+  if pending > 0 then return end
+  if not isUiReady() then
+    later(runAllInOrder, 200)
     return
   end
 
-  modules.corelib.HTTP.get(baseUrl .. file .. ".lua", function(script, err)
-    if err then
-      index = index + 1
-      loadNext()
-      return
+  started = true
+
+  later(function()
+    for i = 1, #files do
+      local name = files[i]
+      local code = memCache[name]
+      if code and code ~= "" then
+        local f = loadstring(code, "@" .. name .. ".lua")
+        if f then
+          pcall(f)
+        end
+      end
     end
 
-    local f, loadErr = loadstring(script)
-    if not f then
-      index = index + 1
-      loadNext()
-      return
+    -- opcional: limpa da memória após executar (ainda mais “limpo”)
+    for k in pairs(memCache) do memCache[k] = nil end
+  end, 300)
+end
+
+local function fetchOne(name)
+  modules.corelib.HTTP.get(baseUrl .. name .. ".lua", function(script, err)
+    if not err and script and script ~= "" then
+      memCache[name] = script
+    else
+      memCache[name] = ""
     end
-
-    f()
-
-    index = index + 1
-    loadNext()
+    pending = pending - 1
+    runAllInOrder()
   end)
 end
 
-loadNext()
+for i = 1, #files do
+  fetchOne(files[i])
+end
+
+runAllInOrder()
