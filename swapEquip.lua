@@ -7,7 +7,6 @@ end
 buttonSwapEquips = setupUI([[
 Panel
   height: 20
-  margin-top: -3
 
   BotSwitch
     id: title
