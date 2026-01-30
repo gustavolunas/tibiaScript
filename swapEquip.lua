@@ -1,4 +1,3 @@
-setDefaultTab("Main")
 local switchSwapEquips = "buttonSwapEquips"
 
 if not storage[switchSwapEquips] then
@@ -8,6 +7,7 @@ end
 buttonSwapEquips = setupUI([[
 Panel
   height: 20
+  margin-top: -3
 
   BotSwitch
     id: title
@@ -60,7 +60,7 @@ EQPanel < Panel
   padding-right: 10
   padding-bottom: 10
 
-  SlotBotItem
+  BotItem
     id: head
     image-source: /images/game/slots/head
     anchors.horizontalCenter: parent.horizontalCenter
@@ -69,7 +69,7 @@ EQPanel < Panel
     $on:
       image-source: /images/ui/item-blessed
 
-  SlotBotItem
+  BotItem
     id: body
     image-source: /images/game/slots/body
     anchors.horizontalCenter: parent.horizontalCenter
@@ -78,7 +78,7 @@ EQPanel < Panel
     $on:
       image-source: /images/ui/item-blessed
 
-  SlotBotItem
+  BotItem
     id: legs
     image-source: /images/game/slots/legs
     anchors.horizontalCenter: parent.horizontalCenter
@@ -87,7 +87,7 @@ EQPanel < Panel
     $on:
       image-source: /images/ui/item-blessed
 
-  SlotBotItem
+  BotItem
     id: feet
     image-source: /images/game/slots/feet
     anchors.horizontalCenter: parent.horizontalCenter
@@ -96,7 +96,7 @@ EQPanel < Panel
     $on:
       image-source: /images/ui/item-blessed
 
-  SlotBotItem
+  BotItem
     id: neck
     image-source: /images/game/slots/neck
     anchors.top: head.top
@@ -106,7 +106,7 @@ EQPanel < Panel
     $on:
       image-source: /images/ui/item-blessed
 
-  SlotBotItem
+  BotItem
     id: left-hand
     image-source: /images/game/slots/left-hand
     anchors.horizontalCenter: prev.horizontalCenter
@@ -115,7 +115,7 @@ EQPanel < Panel
     $on:
       image-source: /images/ui/item-blessed
 
-  SlotBotItem
+  BotItem
     id: finger
     image-source: /images/game/slots/finger
     anchors.horizontalCenter: prev.horizontalCenter
@@ -124,7 +124,7 @@ EQPanel < Panel
     $on:
       image-source: /images/ui/item-blessed
 
-  SlotBotItem
+  BotItem
     id: right-hand
     image-source: /images/game/slots/right-hand
     anchors.left: body.right
@@ -133,7 +133,7 @@ EQPanel < Panel
     $on:
       image-source: /images/ui/item-blessed
 
-  SlotBotItem
+  BotItem
     id: ammo
     image-source: /images/game/slots/ammo
     anchors.horizontalCenter: prev.horizontalCenter
