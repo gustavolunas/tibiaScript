@@ -53,7 +53,7 @@ end
 utilityInterface = setupUI([[
 UIWindow
   id: mainPanel
-  size: 408 300
+  size: 400 310
   border: 1 black
   anchors.centerIn: parent
   margin-top: -60
@@ -111,7 +111,6 @@ UIWindow
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    vertical-scrollbar: contentScroll
     margin-left: 10
     margin-bottom: 5
     margin-top: 12
@@ -122,35 +121,31 @@ UIWindow
       id: leftMacros
       anchors.top: parent.top
       anchors.left: parent.left
-      height: 350
+      height: 271
       width: 190
       margin-top: -1
       image-color: #363636
       layout: verticalBox
       padding: 5
 
+    VerticalSeparator
+      id: vsep
+      anchors.left: prev.right
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+
     FlatPanel
       id: rightMacros
       anchors.top: parent.top
       anchors.left: leftMacros.right
-      height: 350
-      margin-left: 10
+      height: 270
+      margin-left: 1
       width: 190
       image-color: #363636
       layout: verticalBox
       padding: 5
       padding-right: 5
 
-  VerticalScrollBar
-    id: contentScroll
-    anchors.top: content.top
-    anchors.right: content.right
-    anchors.bottom: content.bottom
-    margin-right: 187
-    image-color: #828282
-    step: 40
-    pixels-scroll: true
-    visible: true
 
 ]], g_ui.getRootWidget())
 utilityInterface:hide()
@@ -244,73 +239,109 @@ createBotSwitch("default", destLeft, "Hold Target", storage.utilityToggles, "hol
 createBotSwitch("default", destLeft, "Summon Familiar", storage.utilityToggles, "summonFamiliar")
 createBotSwitch("default", destLeft, "Super Dash", storage.utilityToggles, "superDash")
 UI.Separator(destLeft)
-createBotSwitch("default", destLeft, "Equip Full Might", storage.utilityToggles, "equipFullMight")
-createBotSwitch("default", destLeft, "Equip Full SSA", storage.utilityToggles, "equipFullSSA")
-UI.Separator(destLeft)
 createBotSwitch("default", destLeft, "Esconder Sprites", storage.utilityToggles, "esconderSprites")
 createBotSwitch("default", destLeft, "Esconder Textos", storage.utilityToggles, "esconderTextos")
 createBotSwitch("default", destLeft, "Montar Automatico", storage.utilityToggles, "autoMont")
 UI.Separator(destLeft)
 createBotSwitch("default", destLeft, "Hold Position", storage.utilityToggles, "holdPosition")
 createBotSwitch("default", destLeft, "Sleep Mode", storage.utilityToggles, "sleepMode")
+createBotSwitch("default", destLeft, "Dancing", storage.utilityToggles, "dancingMode")
+UI.Separator(destLeft)
+label = UI.Label("ID Potion Mana:", destLeft) label:setFont("verdana-9px") label:setMarginTop(0)
+potionText = addTextEdit("mi", storage.mi or "23373", function(widget, text) if tonumber(text) then mi = tonumber(text) end storage.mi = tonumber(text) end, destLeft) potionText:setImageColor("#828282") potionText:setMarginLeft(1) potionText:setMarginRight(2) potionText:setFont("verdana-9px")  potionText:setHeight(18)
+createBotSwitch("default", destLeft, "Mana Train ED/MS", storage.utilityToggles, "manaTrainMage")
+
 -- LADO DIREITO
-local nextBpContainer = UI.Container(function(widget, items) storage.proximaBpID = items end, true, destRight) nextBpContainer:setHeight(35) nextBpContainer:setItems(storage.proximaBpID)
+local nextBpContainer = UI.Container(function(widget, items) storage.proximaBpID = items end, true, destRight) nextBpContainer:setHeight(46) nextBpContainer:setItems(storage.proximaBpID)
 createBotSwitch("default", destRight, "Abrir Proxima BP", storage.utilityToggles, "proximaBP")
-local transformCoin = UI.Container(function(widget, items) storage.transformarCoin = items end, true, destRight) transformCoin:setHeight(35) transformCoin:setItems(storage.transformarCoin) transformCoin:setMarginTop(4)
+local transformCoin = UI.Container(function(widget, items) storage.transformarCoin = items end, true, destRight) transformCoin:setHeight(46) transformCoin:setItems(storage.transformarCoin) transformCoin:setMarginTop(4)
 createBotSwitch("default", destRight, "Transformar Coin", storage.utilityToggles, "transformCoin")
 UI.Separator(destRight)
-local doorContainer = UI.Container(function(widget, items) storage.doorIds = items doorId = properTable(storage.doorIds) end, true, destRight) doorContainer:setHeight(35) doorContainer:setItems(storage.doorIds) doorId = properTable(storage.doorIds)
+local doorContainer = UI.Container(function(widget, items) storage.doorIds = items doorId = properTable(storage.doorIds) end, true, destRight) doorContainer:setHeight(46) doorContainer:setItems(storage.doorIds) doorId = properTable(storage.doorIds)
 createBotSwitch("default", destRight, "Abrir Portas", storage.utilityToggles, "abrirPortas")
 UI.Separator(destRight)
-UI.Label("Auto Loot Config", destRight):setFont("verdana-9px")
-lootInput = UI.TextEdit("", function(widget, text) end, destRight) lootInput:setImageColor("#828282") lootInput:setFont("verdana-9px")
-lootLog = UI.Label("Status: Nenhuma loot ainda", destRight) lootLog:setFont("verdana-9px")
-addloot = UI.Button("Add Loot", function()
-  local inputText = lootInput:getText()
-  if inputText and inputText:len() > 0 then
-    for item in inputText:gmatch("[^;]+") do
-      item = item:match("^%s*(.-)%s*$")
-      if #item > 0 then
-        say("!autoloot add,acceptlist," .. item)
-        lootLog:setText("Adicionado: " .. item)
-      end
-    end
-    say("!autoloot itemlist,acceptlist")
-  else
-    warn("Digite ao menos um item.")
-  end
-end, destRight)
-addloot:setImageSource("/images/ui/button_rounded") addloot:setFont("verdana-9px") addloot:setImageColor("#828282")
-removeloot = UI.Button("Remove Loot", function()
-  local inputText = lootInput:getText()
-  if inputText and inputText:len() > 0 then
-    for item in inputText:gmatch("[^;]+") do
-      item = item:match("^%s*(.-)%s*$")
-      if #item > 0 then
-        say("!autoloot remove,acceptlist," .. item)
-        lootLog:setText("Removido: " .. item)
-      end
-    end
-    -- Mostra lista após remover
-    say("!autoloot itemlist,acceptlist")
-  else
-    warn("Digite ao menos um item.")
-  end
-end, destRight)
-removeloot:setImageSource("/images/ui/button_rounded") removeloot:setFont("verdana-9px") removeloot:setImageColor("#828282")
-
-openctainer = UI.Button("Open Containers", function()
-  say("!autoloot containers")
-  lootLog:setText("Abrindo menu de containers...")
-end, destRight)
-openctainer:setImageSource("/images/ui/button_rounded") openctainer:setFont("verdana-9px") openctainer:setImageColor("#828282")
-loostlist = UI.Button("Loot List", function()
-  say("!autoloot itemlist,acceptlist")
-  lootLog:setText("Listando itens do autoloot...")
-end, destRight)
-loostlist:setImageSource("/images/ui/button_rounded") loostlist:setFont("verdana-9px") loostlist:setImageColor("#828282")
+manaText = addTextEdit("Mana Train", storage.manaTrainText, function(widget, text) storage.manaTrainText = text end, destRight) manaText:setImageColor("#828282") manaText:setMarginLeft(1) manaText:setMarginRight(2) manaText:setFont("verdana-9px")  manaText:setHeight(18)
+createBotSwitch("default", destRight, "Mana Train", storage.utilityToggles, "manaTrain")
 
 local function getNextBpIdList() local ids = {} for _, entry in pairs(storage.proximaBpID or {}) do table.insert(ids, entry.id or entry) end return ids end
+
+local function trim(s)
+  return (s:gsub("^%s+", ""):gsub("%s+$", ""))
+end
+
+local function parseTwoSpells(text)
+  text = tostring(text or "")
+  local a, b = text:match("([^,]+),([^,]+)")
+  a = trim(a or "")
+  b = trim(b or "")
+  return a, b
+end
+
+local mtStep = 1
+macro(1000, function()
+  if storage.utilityToggles["manaTrain"] ~= true then return end
+
+  local s1, s2 = parseTwoSpells(storage.manaTrainText)
+
+  if s1 == "" or s2 == "" then
+  end
+
+  if mtStep == 1 then
+    say(s1)
+    mtStep = 2
+    return
+  else
+    say(s2)
+    mtStep = 1
+    return
+  end
+end)
+
+local manaPercent = 30
+local heal1 = "Utana Vid"
+local heal2 = "Exura vita"
+local voc = player:getVocation()
+
+local train = macro(200, function()
+  if storage.utilityToggles["manaTrainMage"] ~= true then return end
+ for i, npc in ipairs(getSpectators()) do
+  if npc:isNpc() and (getDistanceBetween(pos(), npc:getPosition()) <= 3) then
+   if voc == 4 or voc == 14 then --ED
+    say(heal1)
+     say(heal2)
+    say(heal3)
+   say(heal4)
+  elseif voc == 3 or voc == 13 then --MS
+   say(heal1)
+   say(heal2)
+    end
+   if manapercent() <= manaPercent then
+    usewith(storage.mi, player) 
+   end
+  end
+ end
+end)
+
+onTextMessage(function(mode, text)
+ if train.isOff() then return end
+  local mp = 'Using one of ([0-9]*)'
+   local re1 = regexMatch(text, mp)
+    local tmp = ""
+     if #re1 ~= 0 then
+      tmp = tonumber(re1[1][2])
+     for i, npc2 in ipairs(getSpectators()) do
+    if npc2:isNpc() and (getDistanceBetween(pos(), npc2:getPosition()) <= 3) then
+   if tmp <= 80 then
+  NPC.say("hi")
+ schedule(1000, function() NPC.say("trade") end)
+schedule(1500, function() NPC.buy(storage.mi, 20) end)
+ schedule(2000, function() NPC.say("bye") end)
+  schedule(2500, function() NPC.closeTrade() end)
+   end
+   end
+  end
+ end
+end)
 
 macro(1000, function()
   if storage.utilityToggles["proximaBP"] ~= true then return end
@@ -432,6 +463,126 @@ macro(500, function()
   say(spell)
   delay(5000)
 end)
+-----------------------------------------
+
+macro(500, function()
+  if storage.utilityToggles["autoMont"] ~= true then return end
+  if isInPz() then return end
+    local pOutifit = player:getOutfit()
+    local isMounted = pOutifit.mount ~= nil and pOutifit.mount > 0
+    if not isMounted then
+        player:mount()
+    end
+end)
+
+----------------------------
+
+local moveTime = 2000     -- Wait time between Move, 2000 milliseconds = 2 seconds
+local moveDist = 5        -- How far to Walk
+local useTime = 2000     -- Wait time between Use, 2000 milliseconds = 2 seconds
+local useDistance = 1
+
+macro(200, function()
+  if storage.utilityToggles["abrirPortas"] ~= true then return end
+  for i, tile in ipairs(g_map.getTiles(posz())) do
+      local item = tile:getTopUseThing()
+      if item and table.find(doorId, item:getId()) then
+          local tPos = tile:getPosition()
+          local distance = getDistanceBetween(pos(), tPos)
+          if (distance <= useDistance) then
+              use(item)
+              return delay(useTime)
+          end
+
+          if (distance <= moveDist and distance > useDistance) then
+              if findPath(pos(), tPos, moveDist, { ignoreNonPathable = true, precision = 1 }) then
+                  autoWalk(tPos, moveTime, { ignoreNonPathable = true, precision = 1 })
+                  return delay(waitTime)
+              end
+          end
+      end
+  end
+end, destRight)
+
+------------------------------
+
+------------------------------------------------------
+local secondsToIdle = 5
+local activeFPS =  60
+---------------------------------------------------------
+
+local afkFPS = 5
+function botPrintMessage(message)
+  modules.game_textmessage.displayGameMessage(message)
+end
+
+local function isSameMousePos(p1,p2)
+  return p1.x == p2.x and p1.y == p2.y
+end
+
+local function setAfk()
+  modules.client_options.setOption("backgroundFrameRate", afkFPS)
+  modules.game_interface.gameMapPanel:hide()
+end
+
+local function setActive()
+  modules.client_options.setOption("backgroundFrameRate", activeFPS)
+  modules.game_interface.gameMapPanel:show()
+end
+
+local lastMousePos = nil
+local finalMousePos = nil
+local idleCount = 0
+local maxIdle = secondsToIdle * 4
+macro(250, function()
+  if storage.utilityToggles["sleepMode"] ~= true then return end
+  local currentMousePos = g_window.getMousePosition()
+
+  if finalMousePos then
+    if isSameMousePos(finalMousePos,currentMousePos) then return end
+    setActive()
+    finalMousePos = nil
+  end
+
+  if lastMousePos and isSameMousePos(lastMousePos,currentMousePos) then
+    idleCount = idleCount + 1
+  else
+    lastMousePos = currentMousePos
+    idleCount = 0
+  end
+
+  if idleCount == maxIdle then
+    setAfk()
+    finalMousePos = currentMousePos
+    idleCount = 0
+  end
+
+end)
+
+------------------------------
+
+onAddThing(function(tile, thing)
+    if storage.utilityToggles["esconderSprites"] ~= true then return end
+    if thing:isEffect() then
+        thing:hide()
+    end
+end)
+
+onStaticText(function(thing, text)
+    if storage.utilityToggles["esconderTextos"] ~= true then return end
+    if not text:find('says:') then
+        g_map.cleanTexts()
+    end
+end);
+
+onTextMessage(function(mode, text)
+    if storage.utilityToggles["esconderTextos"] ~= true then return end
+    modules.game_textmessage.clearMessages()
+    g_map.cleanTexts()
+end);
+
+
+------------------------------------------------
 
 BugMap = {}
 
@@ -601,123 +752,3 @@ macro(100, function()
 
   g_game.use(top)
 end)
-
-
-------------------------------------------
-local config = {
-  SSAID = 3081,
-  MIGHTID = 3048,
-  ENERGYID = 3088
-}
-
-local function isToggleOn(key)
-  if not storage.utilityToggles then return false end
-  local v = storage.utilityToggles[key]
-  if type(v) == "table" then return v.enabled == true end
-  return v == true
-end
-
-local function findItemInOpenContainers(itemId)
-  for _, c in pairs(g_game.getContainers()) do
-    if c and not c.lootContainer then
-      for __, it in ipairs(c:getItems()) do
-        if it and it:getId() == itemId then
-          return it
-        end
-      end
-    end
-  end
-  return nil
-end
-
-macro(200, function()
-  if not isToggleOn("equipFullSSA") then return end
-
-  local neck = getNeck()
-  local hasSSA = neck and neck:getId() == config.SSAID
-  if hasSSA then return end
-
-  -- 1) tenta “arrastar” (move pro slot)
-  local ssaItem = findItemInOpenContainers(config.SSAID)
-  if ssaItem then
-    g_game.move(ssaItem, {x = 65535, y = SlotNeck, z = 0}, 1)
-    return
-  end
-
-  g_game.equipItemId(config.SSAID, SlotNeck)
-end)
-
-macro(200, function()
-  if not isToggleOn("equipFullMight") then return end
-
-  local finger = getFinger()
-  local hasMight = finger and finger:getId() == config.MIGHTID
-  if hasMight then return end
-
-  -- 1) tenta arrastar o Might Ring pro SlotFinger
-  local mightItem = findItemInOpenContainers(config.MIGHTID)
-  if mightItem then
-    g_game.move(mightItem, { x = 65535, y = SlotFinger, z = 0 }, 1)
-    return
-  end
-
-  -- 2) fallback
-  g_game.equipItemId(config.MIGHTID, SlotFinger)
-end)
-
-macro(500, function()
-  if storage.utilityToggles["proximaBP"] ~= true then return end
-  if isInPz() then return end
-    local pOutifit = player:getOutfit()
-    local isMounted = pOutifit.mount ~= nil and pOutifit.mount > 0
-    if not isMounted then
-        player:mount()
-    end
-end)
-
-local moveTime = 2000     -- Wait time between Move, 2000 milliseconds = 2 seconds
-local moveDist = 5        -- How far to Walk
-local useTime = 2000     -- Wait time between Use, 2000 milliseconds = 2 seconds
-local useDistance = 1
-
-macro(200, function()
-  if storage.utilityToggles["abrirPortas"] ~= true then return end
-  for i, tile in ipairs(g_map.getTiles(posz())) do
-      local item = tile:getTopUseThing()
-      if item and table.find(doorId, item:getId()) then
-          local tPos = tile:getPosition()
-          local distance = getDistanceBetween(pos(), tPos)
-          if (distance <= useDistance) then
-              use(item)
-              return delay(useTime)
-          end
-
-          if (distance <= moveDist and distance > useDistance) then
-              if findPath(pos(), tPos, moveDist, { ignoreNonPathable = true, precision = 1 }) then
-                  autoWalk(tPos, moveTime, { ignoreNonPathable = true, precision = 1 })
-                  return delay(waitTime)
-              end
-          end
-      end
-  end
-end, destRight)
-
-onAddThing(function(tile, thing)
-    if storage.utilityToggles["esconderSprites"] ~= true then return end
-    if thing:isEffect() then
-        thing:hide()
-    end
-end)
-
-onStaticText(function(thing, text)
-    if storage.utilityToggles["esconderTextos"] ~= true then return end
-    if not text:find('says:') then
-        g_map.cleanTexts()
-    end
-end);
-
-onTextMessage(function(mode, text)
-    if storage.utilityToggles["esconderTextos"] ~= true then return end
-    modules.game_textmessage.clearMessages()
-    g_map.cleanTexts()
-end);
