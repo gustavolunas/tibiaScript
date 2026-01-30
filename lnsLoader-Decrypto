@@ -1,6 +1,9 @@
-if storage and storage.scriptsCache then
-  storage.scriptsCache = nil
-end
+-- =========================
+-- LNS Loader (ordem fixa)
+-- - NÃO usa storage para cache
+-- - Baixa tudo primeiro e só executa depois que UI estiver pronta
+-- - Remove storage.scriptsCache repetidamente (caso outro loader recrie)
+-- =========================
 
 local baseUrl = "https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/master/"
 
@@ -20,6 +23,7 @@ local files = {
 -- cache só em memória (some ao fechar o client)
 local memCache = {} -- [name] = scriptText
 
+-- scheduler seguro (não depende do scheduleEvent existir cedo)
 local function later(fn, ms)
   if type(scheduleEvent) == "function" then
     return scheduleEvent(fn, ms)
@@ -30,13 +34,18 @@ local function later(fn, ms)
   return fn()
 end
 
+-- UI pronta = styles aplicados (evita bug do UI.Container)
 local function isUiReady()
   if not g_game or not g_game.isOnline or not g_game:isOnline() then return false end
   if not g_ui or type(g_ui.getRootWidget) ~= "function" then return false end
+
   local root = g_ui.getRootWidget()
   if not root then return false end
-  return root:recursiveGetChildById("gameRootPanel") ~= nil
-      or root:recursiveGetChildById("gameInterface") ~= nil
+
+  if root:recursiveGetChildById("gameRootPanel") then return true end
+  if root:recursiveGetChildById("gameInterface") then return true end
+
+  return false
 end
 
 local pending = #files
@@ -45,6 +54,7 @@ local started = false
 local function runAllInOrder()
   if started then return end
   if pending > 0 then return end
+
   if not isUiReady() then
     later(runAllInOrder, 200)
     return
@@ -52,10 +62,12 @@ local function runAllInOrder()
 
   started = true
 
+  -- delay extra pra garantir que o pack terminou de aplicar style
   later(function()
     for i = 1, #files do
       local name = files[i]
       local code = memCache[name]
+
       if code and code ~= "" then
         local f = loadstring(code, "@" .. name .. ".lua")
         if f then
@@ -64,8 +76,10 @@ local function runAllInOrder()
       end
     end
 
-    -- opcional: limpa da memória após executar (ainda mais “limpo”)
-    for k in pairs(memCache) do memCache[k] = nil end
+    -- limpa cache da memória (opcional)
+    for k in pairs(memCache) do
+      memCache[k] = nil
+    end
   end, 300)
 end
 
@@ -76,13 +90,36 @@ local function fetchOne(name)
     else
       memCache[name] = ""
     end
+
     pending = pending - 1
     runAllInOrder()
   end)
 end
 
+-- baixa todos de uma vez
 for i = 1, #files do
   fetchOne(files[i])
 end
 
+-- tenta iniciar (vai aguardar UI ficar pronta)
 runAllInOrder()
+
+-- =========================
+-- Anti scriptsCache (NÃO usa rawset/metatable)
+-- Apaga várias vezes pq algum loader antigo pode recriar durante o download
+-- =========================
+local tries = 0
+local function wipeScriptsCache()
+  tries = tries + 1
+
+  if storage and storage.scriptsCache ~= nil then
+    storage.scriptsCache = nil
+  end
+
+  -- ~10s (50 * 200ms)
+  if tries < 50 then
+    later(wipeScriptsCache, 200)
+  end
+end
+
+wipeScriptsCache()
