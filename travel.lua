@@ -4,7 +4,7 @@ storage[switchTravel] = storage[switchTravel] or { enabled = false }
 
 travelButton = setupUI([[
 Panel
-  height: 17
+  height: 20
   
   BotSwitch
     id: title
@@ -345,3 +345,4 @@ onAttackingCreatureChange(function(creature, OldCreature)
 end)
 
 UI.Separator()
+
