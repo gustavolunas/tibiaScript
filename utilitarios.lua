@@ -3,6 +3,7 @@ UI.Separator()
 local iconUtilitys = setupUI([[
 Panel
   height: 17
+  margin-top: 2
 
   Button
     id: settings
