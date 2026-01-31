@@ -22,6 +22,9 @@ CaveBot.Editor.registerAction = function(action, text, params)
   
   local button = UI.createWidget('CaveBotEditorButton', CaveBot.Editor.ui.buttons)
   button:setText(text)
+  button:setImageSource("/images/ui/button_rounded")
+  button:setImageColor("#828282")
+  button:setFont("verdana-9px")
   if color then
     button:setColor(color)
   end
