@@ -1,7 +1,7 @@
 CaveBot.Extensions.DWithdraw = {}
 
 CaveBot.Extensions.DWithdraw.setup = function()
-	CaveBot.registerAction("dpwithdraw", "#002FFF", function(value, retries)
+	CaveBot.registerAction("dpwithdraw", "#efefef", function(value, retries)
 		local capLimit
 		local data = string.split(value, ",")
 		if retries > 600 then
