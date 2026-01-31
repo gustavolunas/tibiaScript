@@ -1,7 +1,7 @@
 CaveBot.Extensions.InWithdraw = {}
 
 CaveBot.Extensions.InWithdraw.setup = function()
-	CaveBot.registerAction("inwithdraw", "#002FFF", function(value, retries)
+	CaveBot.registerAction("inwithdraw", "#efefef", function(value, retries)
 		local data = string.split(value, ",")
 		local withdrawId
 		local amount
