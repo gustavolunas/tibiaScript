@@ -332,20 +332,13 @@ local voc = player:getVocation()
 
 local train = macro(200, function()
   if storage.utilityToggles["manaTrainMage"] ~= true then return end
- for i, npc in ipairs(getSpectators()) do
-  if npc:isNpc() and (getDistanceBetween(pos(), npc:getPosition()) <= 3) then
-   if voc == 4 or voc == 14 then --ED
+  for i, npc in ipairs(getSpectators()) do
+  if npc:isNpc() and (getDistanceBetween(pos(), npc:getPosition()) <= 5) then
     say(heal1)
-     say(heal2)
-    say(heal3)
-   say(heal4)
-  elseif voc == 3 or voc == 13 then --MS
-   say(heal1)
-   say(heal2)
-    end
-   if manapercent() <= manaPercent then
+    say(heal2)
+  end
+  if manapercent() <= manaPercent then
     usewith(storage.mi, player) 
-   end
   end
  end
 end)
