@@ -31,6 +31,7 @@ TargetBot.Creature.addConfig = function(config, focus)
 
   local widget = UI.createWidget("TargetBotEntry", TargetBot.targetList)
   widget:setText(config.name)
+  widget:setFont("verdana-9px-bold")
   widget.value = config
 
   widget.onDoubleClick = function(entry) -- edit on double click

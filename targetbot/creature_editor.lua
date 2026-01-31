@@ -7,10 +7,15 @@ TargetBot.Creature.edit = function(config, callback) -- callback = function(newC
   editor.name:setText(config.name or "")
   table.insert(values, {"name", function() return editor.name:getText() end})
 
+  editor.closePanel.onClick = function()
+      editor:hide()
+  end
   local addScrollBar = function(id, title, min, max, defaultValue)
     local widget = UI.createWidget('TargetBotCreatureEditorScrollBar', editor.content.left)
+    widget:setFont("verdana-9px")
     widget.scroll.onValueChange = function(scroll, value)
       widget.text:setText(title .. ": " .. value)
+      widget.text:setFont("verdana-9px")
     end
     widget.scroll:setRange(min, max)
     if max-min > 1000 then
@@ -36,6 +41,8 @@ TargetBot.Creature.edit = function(config, callback) -- callback = function(newC
       widget:setOn(not widget:isOn())
     end
     widget:setText(title)
+    widget:setFont("verdana-9px")
+    widget:setImageSource("/images/ui/button_rounded")
     if config[id] == nil then
       widget:setOn(defaultValue)
     else

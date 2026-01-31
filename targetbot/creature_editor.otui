@@ -61,27 +61,63 @@ TargetBotCreatureEditorCheckBox < BotSwitch
   height: 20
   margin-top: 7
 
-TargetBotCreatureEditorWindow < MainWindow
+TargetBotCreatureEditorWindow < UIWindow
   text: TargetBot creature editor
-  width: 500
-  height: 425
-  
+  width: 400
+  height: 350
+  border: 1 black
+  anchors.centerIn: parent
+  margin-top: -60
+
   $mobile:
     height: 300
 
-  Label
-    anchors.left: parent.left
-    anchors.right: parent.right
+  Panel
+    id: background
     anchors.top: parent.top
-    text-align: center
-    !text: tr('You can use * (any characters) and ? (any character) in target name')
-
-  Label
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.top: prev.bottom
+    anchors.bottom: parent.bottom
+    background-color: black
+    opacity: 0.70
+
+  Panel
+    id: topPanel
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    size: 120 30
     text-align: center
-    !text: tr('You can also enter multiple targets, separate them by ,')
+    !text: tr('LNS Custom | Target Editor')
+    color: orange
+    margin-left: 0
+    margin-right: 0
+    background-color: black
+    $hover:
+      image-color: gray
+  
+  Panel
+    id: iconPanel
+    anchors.top: parent.top
+    anchors.left: parent.left
+    size: 60 60
+    margin-top: -19
+    margin-left: -15
+
+  UIButton
+    id: closePanel
+    anchors.top: topPanel.top
+    anchors.right: parent.right
+    size: 18 18
+    margin-top: 6
+    margin-right: 10
+    background-color: orange
+    text: X
+    color: white
+    opacity: 1.00
+    $hover:
+      color: black
+      opacity: 0.80
   
   TextEdit
     id: name
@@ -89,32 +125,53 @@ TargetBotCreatureEditorWindow < MainWindow
     anchors.left: parent.left
     anchors.right: parent.right
     margin-left: 90
-    margin-top: 5
+    margin-right: 10
+    margin-top: 10
+    image-color: #828282
+    placeholder: INSERT TARGET NAME
+    placeholder-font: verdana-9px
+    font: verdana-9px
 
   Label
     anchors.verticalCenter: prev.verticalCenter
     anchors.left: parent.left
+    margin-left: 13
+    font: verdana-9px-bold
     text: Target name:
 
   VerticalScrollBar
     id: contentScroll
     anchors.top: name.bottom
     anchors.right: parent.right
-    anchors.bottom: help.top
+    anchors.bottom: ok.top
     step: 28
     pixels-scroll: true
-    margin-right: -10
+    margin-right: 5
     margin-top: 5
     margin-bottom: 5
+
+  FlatPanel
+    id: fundo
+    anchors.top: name.bottom
+    anchors.right: parent.right
+    anchors.left: parent.left
+    anchors.bottom: ok.top
+    margin-right: 5
+    margin-left: 5
+    image-color: #363636
+    layout: verticalBox
+    margin-bottom: 5
+    margin-top: 5
 
   ScrollablePanel
     id: content
     anchors.top: name.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.bottom: help.top
+    anchors.bottom: ok.top
     vertical-scrollbar: contentScroll
     margin-bottom: 10
+    margin-top: 5
       
     Panel
       id: left
@@ -123,7 +180,7 @@ TargetBotCreatureEditorWindow < MainWindow
       anchors.right: parent.horizontalCenter
       margin-top: 5
       margin-left: 10
-      margin-right: 10
+      margin-right: 20
       layout:
         type: verticalBox
         fit-children: true
@@ -134,31 +191,38 @@ TargetBotCreatureEditorWindow < MainWindow
       anchors.left: parent.horizontalCenter
       anchors.right: parent.right
       margin-top: 5
-      margin-left: 10
-      margin-right: 10
+      margin-left: 5
+      margin-right: 20
       layout:
         type: verticalBox
         fit-children: true
-  
-  Button
-    id: help
-    !text: tr('Help & Tutorials')
-    anchors.bottom: parent.bottom
-    anchors.left: parent.left
-    width: 150
-    @onClick: g_platform.openUrl("http://bot.otclient.ovh/")
 
   Button
     id: ok
-    !text: tr('Ok')
+    !text: tr('Confirm')
     anchors.bottom: parent.bottom
     anchors.right: next.left
     margin-right: 10
-    width: 60
+    margin-bottom: 3
+    font: verdana-9px
+    image-source: /images/ui/button_rounded
+    image-color: #363636
+    width: 80
+    color: gray
+    $hover:
+      color: green
 
   Button
     id: cancel
     !text: tr('Cancel')
     anchors.bottom: parent.bottom
     anchors.right: parent.right
-    width: 60
+    font: verdana-9px
+    margin-bottom: 3
+    margin-right: 5
+    image-source: /images/ui/button_rounded
+    image-color: #363636
+    width: 80
+    color: gray
+    $hover:
+      color: red

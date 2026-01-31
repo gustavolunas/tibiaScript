@@ -97,7 +97,7 @@ TargetBotPanel < Panel
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        text: ADD
+        text: Add
         color: white
         font: verdana-9px
         image-source: /images/ui/button_rounded
@@ -113,7 +113,7 @@ TargetBotPanel < Panel
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        text: EDIT
+        text: Edit
         color: white
         font: verdana-9px
         image-source: /images/ui/button_rounded
@@ -129,7 +129,7 @@ TargetBotPanel < Panel
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.right: parent.right
-        text: REMOVE
+        text: Remove
         color: white
         font: verdana-9px
         image-source: /images/ui/button_rounded
