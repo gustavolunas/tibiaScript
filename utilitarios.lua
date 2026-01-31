@@ -283,10 +283,18 @@ end
 
 local function parseTwoSpells(text)
   text = tostring(text or "")
-  local a, b = text:match("([^,]+),([^,]+)")
-  a = trim(a or "")
-  b = trim(b or "")
-  return a, b
+
+  -- tenta pegar "a,b"
+  local a, b = text:match("^%s*([^,]+)%s*,%s*([^,]+)%s*$")
+  if a then
+    a = trim(a)
+    b = trim(b or "")
+    return a, b
+  end
+
+  -- se não tem vírgula, pega só uma magia
+  local single = trim(text)
+  return single, ""
 end
 
 local mtStep = 1
@@ -295,17 +303,25 @@ macro(1000, function()
 
   local s1, s2 = parseTwoSpells(storage.manaTrainText)
 
-  if s1 == "" or s2 == "" then
+  -- nada configurado
+  if s1 == "" then return end
+
+  -- só 1 magia: cast sempre ela
+  if s2 == "" then
+    say(s1)
+    delay(500)
+    return
   end
 
+  -- 2 magias: alterna
   if mtStep == 1 then
     say(s1)
     mtStep = 2
-    return
+    delay(500)
   else
     say(s2)
     mtStep = 1
-    return
+    delay(500)
   end
 end)
 
