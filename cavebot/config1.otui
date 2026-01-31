@@ -12,7 +12,7 @@ BotConfig < Panel
     anchors.right: parent.right
     text-align: center
     margin-top: -2
-    text: CAVE/TARGETBOT LNS SCRIPTS
+    text: CAVE/TARGET LNS SCRIPTS
     color: orange
     font: verdana-9px-bold
 
@@ -61,7 +61,7 @@ BotConfig < Panel
     id: add
     anchors.top: prev.bottom
     anchors.left: list.left
-    text: ADD
+    text: Add
     color: white
     font: verdana-9px
     image-source: /images/ui/button_rounded
@@ -76,7 +76,7 @@ BotConfig < Panel
     id: edit
     anchors.top: prev.top
     anchors.left: prev.right
-    text: EDIT
+    text: Edit
     color: white
     font: verdana-9px
     image-source: /images/ui/button_rounded
@@ -92,7 +92,7 @@ BotConfig < Panel
     id: remove
     anchors.top: prev.top
     anchors.left: prev.right
-    text: REMOVE
+    text: Remove
     color: white
     font: verdana-9px
     image-source: /images/ui/button_rounded
