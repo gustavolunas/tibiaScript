@@ -96,7 +96,7 @@ TargetBot.Creature.edit = function(config, callback) -- callback = function(newC
   addScrollBar("rePositionAmount", "Min tiles to rePosition", 0, 7, 5)
   addScrollBar("closeLureAmount", "Close Pull Until", 0, 8, 3)
 
-  addCheckBox("chase", "Chase", true)
+  addCheckBox("chase", "Chase", false)
   addCheckBox("keepDistance", "Keep Distance", false)
   addCheckBox("anchor", "Anchoring", false)
   addCheckBox("dontLoot", "Don't loot", false)
