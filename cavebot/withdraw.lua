@@ -1,7 +1,7 @@
 CaveBot.Extensions.Withdraw = {}
 
 CaveBot.Extensions.Withdraw.setup = function()
-	CaveBot.registerAction("withdraw", "#002FFF", function(value, retries)
+	CaveBot.registerAction("withdraw", "#efefef", function(value, retries)
 		-- validation
 		local data = string.split(value, ",")
 		if #data ~= 3 then
