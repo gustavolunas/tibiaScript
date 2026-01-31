@@ -578,7 +578,7 @@ UIWindow
       text-auto-resize: true
 
 ]], g_ui.getRootWidget())
-swapEquipsInterface:show()
+swapEquipsInterface:hide()
 swapEquipsInterface.panelCombat:hide()
 swapEquipsInterface.panelDefAttack:hide()
 swapEquipsInterface.panelBossPVP:hide()
