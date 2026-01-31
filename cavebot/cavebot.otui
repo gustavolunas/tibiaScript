@@ -45,7 +45,7 @@ CaveBotPanel < Panel
     margin-top: 2
     
     $on:
-      text: HIDE WAYPOINTS EDITOR
+      text: Hide Waypoints Edit
       image-color: #363636
 
     $!on:
