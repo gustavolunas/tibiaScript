@@ -352,10 +352,10 @@ onTextMessage(function(mode, text)
       tmp = tonumber(re1[1][2])
      for i, npc2 in ipairs(getSpectators()) do
     if npc2:isNpc() and (getDistanceBetween(pos(), npc2:getPosition()) <= 3) then
-   if tmp <= 80 then
+   if tmp <= 50 then
   NPC.say("hi")
  schedule(1000, function() NPC.say("trade") end)
-schedule(1500, function() NPC.buy(storage.mi, 20) end)
+schedule(1500, function() NPC.buy(storage.mi, 200) end)
  schedule(2000, function() NPC.say("bye") end)
   schedule(2500, function() NPC.closeTrade() end)
    end
