@@ -7,6 +7,7 @@ end
 buttonSwapEquips = setupUI([[
 Panel
   height: 20
+  margin-top: -3
 
   BotSwitch
     id: title
@@ -199,46 +200,45 @@ UIWindow
     id: Combat
     anchors.top: topPanel.bottom
     anchors.left: topPanel.left
-    size: 120 35
+    size: 80 20
     text: COMBAT
     image-source: /images/ui/button_rounded
     image-color: #363636
-    margin-top: 10
+    margin-left: 5
+    margin-top: 5
     font: verdana-9px
     color: white
 
   Button
     id: DefAttack
-    anchors.top: prev.bottom
-    anchors.left: prev.left
-    size: 120 35
-    text: DEF/ATTACK SET
+    anchors.top: prev.top
+    anchors.left: prev.right
+    size: 80 20
+    text: DEF/ATTACK
     image-source: /images/ui/button_rounded
     image-color: #363636
-    margin-top: 10
     font: verdana-9px
     color: white
 
   Button
     id: Equipper
-    anchors.top: prev.bottom
-    anchors.left: prev.left
-    size: 120 35
+    anchors.top: prev.top
+    anchors.left: prev.right
+    size: 80 20
     text: BOSS/PVP
     image-source: /images/ui/button_rounded
     image-color: #363636
-    margin-top: 10
     font: verdana-9px
     color: white
 
   FlatPanel
     id: panelCombat
-    anchors.top: Combat.top
+    anchors.top: Combat.bottom
     anchors.right: parent.right
-    anchors.left: Combat.right
+    anchors.left: Combat.left
     anchors.bottom: parent.bottom
     margin-right: 5
-    margin-left: 5
+    margin-top: 1
     margin-bottom: 10
     image-color: #363636
 
@@ -305,7 +305,7 @@ UIWindow
       anchors.left: parent.left
       anchors.right: parent.right
       text-align: center
-      margin-top: 20
+      margin-top: 15
       text: [SWAP MANA LEECH] - WEAPON & HELMET
       font: verdana-9px
       color: orange
@@ -415,7 +415,7 @@ UIWindow
       anchors.top: parent.top
       anchors.right: setAttack.right
       text-align: center
-      margin-top: 10
+      margin-top: 5
       text: "[SET ATTACK]"
       color: orange
       font: verdana-9px
@@ -433,7 +433,7 @@ UIWindow
       anchors.right: setDefense.right
       anchors.top: parent.top
       text-align: center
-      margin-top: 10
+      margin-top: 5
       text: "[SET DEFENSE]"
       color: orange
       font: verdana-9px
@@ -494,7 +494,7 @@ UIWindow
       anchors.top: parent.top
       anchors.right: setNormal.right
       text-align: center
-      margin-top: 10
+      margin-top: 5
       text: "[SET NORMAL]"
       color: orange
       font: verdana-9px
@@ -504,7 +504,7 @@ UIWindow
       anchors.left: parent.left
       anchors.top: parent.top
       anchors.bottom: parent.bottom
-      margin-top: 20
+      margin-top: 15
 
     Label
       id: LabelSet2
@@ -512,7 +512,7 @@ UIWindow
       anchors.right: setBoss.right
       anchors.top: parent.top
       text-align: center
-      margin-top: 10
+      margin-top: 5
       text: "[SET BOSS]"
       color: orange
       font: verdana-9px
@@ -522,7 +522,7 @@ UIWindow
       anchors.left: setNormal.right
       anchors.top: parent.top
       anchors.bottom: parent.bottom
-      margin-top: 20
+      margin-top: 15
 
     Button
       id: bossList
@@ -531,10 +531,10 @@ UIWindow
       anchors.top: setBoss.bottom
       image-source: /images/ui/button_rounded
       image-color: #363636
-      margin-top: -35
+      margin-top: -30
       font: verdana-9px
       text: Lista Bosses
-      height: 18
+      height: 16
 
     CheckBox
       id: setBossAuto
@@ -542,6 +542,7 @@ UIWindow
       anchors.right: bossList.right
       anchors.top: bossList.bottom
       margin-top: 2
+      margin-left: 2
       image-source: /images/ui/checkbox_round
       text: Auto Equip
       font: verdana-9px
@@ -553,7 +554,7 @@ UIWindow
       anchors.right: setPVP.right
       anchors.top: parent.top
       text-align: center
-      margin-top: 10
+      margin-top: 5
       text: "[SET PVP]"
       color: orange
       font: verdana-9px
@@ -563,13 +564,13 @@ UIWindow
       anchors.left: setBoss.right
       anchors.top: parent.top
       anchors.bottom: parent.bottom
-      margin-top: 20
+      margin-top: 15
 
     CheckBox
       id: setPVPAuto
       anchors.left: setPVP.left
       anchors.top: setPVP.bottom
-      margin-top: -35
+      margin-top: -30
       margin-left: 10
       image-source: /images/ui/checkbox_round
       text: Auto Equip
@@ -577,7 +578,7 @@ UIWindow
       text-auto-resize: true
 
 ]], g_ui.getRootWidget())
-swapEquipsInterface:hide()
+swapEquipsInterface:show()
 swapEquipsInterface.panelCombat:hide()
 swapEquipsInterface.panelDefAttack:hide()
 swapEquipsInterface.panelBossPVP:hide()
@@ -611,26 +612,89 @@ local function setMainSize(w, h)
     end
   end
 end
+local function getWin()
+  return swapEquipsInterface.mainPanel or swapEquipsInterface
+end
+
+local function sizeToWH(sz)
+  if type(sz) == "table" then
+    return sz.width or sz.w or 0, sz.height or sz.h or 0
+  end
+  -- alguns builds retornam objeto Size com .width/.height
+  return (sz and sz.width) or 0, (sz and sz.height) or 0
+end
+
+local function centerWindow(offsetY)
+  offsetY = tonumber(offsetY or -60) or -60
+  local win = getWin()
+  if not win or win:isDestroyed() then return end
+
+  local parent = win:getParent() or g_ui.getRootWidget()
+  if not parent or parent:isDestroyed() then return end
+
+  local ps = parent:getSize()
+  local ws = win:getSize()
+
+  local pw, ph = sizeToWH(ps)
+  local ww, wh = sizeToWH(ws)
+  if pw <= 0 or ph <= 0 or ww <= 0 or wh <= 0 then return end
+
+  local x = math.floor((pw - ww) / 2)
+  local y = math.floor((ph - wh) / 2) + offsetY
+
+  win:setPosition({ x = x, y = y })
+end
+
+-- quebra anchors UMA vez, pra centralização manual funcionar sempre
+do
+  local win = getWin()
+  if win and not win:isDestroyed() and win.breakAnchors then
+    win:breakAnchors()
+  end
+end
+
+-- helper: resize + centraliza (centraliza depois do layout atualizar)
+local function setMainSizeCentered(w, h)
+  setMainSize(w, h)
+  schedule(1, function()
+    centerWindow(-60)
+  end)
+end
 
 local function showCombatPage()
-  setMainSize(408, 240)
+  setMainSizeCentered(330, 240)
+
   swapEquipsInterface.panelCombat:show()
   swapEquipsInterface.panelDefAttack:hide()
   swapEquipsInterface.panelBossPVP:hide()
+
+  swapEquipsInterface.Combat:setColor("yellow")
+  swapEquipsInterface.DefAttack:setColor("gray")
+  swapEquipsInterface.Equipper:setColor("gray")
 end
 
 local function showDefAttackPage()
-  setMainSize(450, 270)
+  setMainSizeCentered(330, 270)
+
   swapEquipsInterface.panelCombat:hide()
   swapEquipsInterface.panelDefAttack:show()
   swapEquipsInterface.panelBossPVP:hide()
+
+  swapEquipsInterface.Combat:setColor("gray")
+  swapEquipsInterface.DefAttack:setColor("yellow")
+  swapEquipsInterface.Equipper:setColor("gray")
 end
 
 local function showBossPvpPage()
-  setMainSize(605, 270)
+  setMainSizeCentered(485, 270)
+
   swapEquipsInterface.panelCombat:hide()
   swapEquipsInterface.panelDefAttack:hide()
   swapEquipsInterface.panelBossPVP:show()
+
+  swapEquipsInterface.Combat:setColor("gray")
+  swapEquipsInterface.DefAttack:setColor("gray")
+  swapEquipsInterface.Equipper:setColor("yellow")
 end
 
 swapEquipsInterface.Combat.onClick = function() showCombatPage() end
@@ -646,9 +710,13 @@ end
 buttonSwapEquips.settings.onClick = function()
   if not swapEquipsInterface:isVisible() then
     swapEquipsInterface:show()
-    swapEquipsInterface:raise()
-    swapEquipsInterface:focus()
   end
+  swapEquipsInterface:raise()
+  swapEquipsInterface:focus()
+
+  schedule(1, function()
+    centerWindow(-60)
+  end)
 end
 
 local storePrefix = "swapEquips_v1_"
