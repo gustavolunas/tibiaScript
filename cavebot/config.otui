@@ -12,6 +12,7 @@ CaveBotConfigPanel < Panel
   Label
     text-align: center
     text: CaveBot Config
+    font: verdana-9px
     margin-top: 5
 
 CaveBotConfigNumberValuePanel < Panel
@@ -25,12 +26,14 @@ CaveBotConfigNumberValuePanel < Panel
     anchors.bottom: parent.bottom
     margin-right: 5
     width: 50
-
+    font: verdana-9px
+    
   Label
     id: title
     anchors.left: parent.left
     anchors.verticalCenter: prev.verticalCenter
     margin-left: 5
+    font: verdana-9px
 
 CaveBotConfigBooleanValuePanel < Panel
   height: 20
@@ -42,6 +45,8 @@ CaveBotConfigBooleanValuePanel < Panel
     anchors.top: parent.top
     anchors.bottom: parent.bottom
     margin-right: 5
+    font: verdana-9px
+    image-source: /images/ui/button_rounded
     width: 50
     
     $on:
@@ -55,3 +60,4 @@ CaveBotConfigBooleanValuePanel < Panel
     anchors.left: parent.left
     anchors.verticalCenter: prev.verticalCenter
     margin-left: 5
+    font: verdana-9px
