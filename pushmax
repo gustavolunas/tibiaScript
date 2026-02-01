@@ -1,5 +1,3 @@
-setDefaultTab(" II ")
-
 warning = function() end
 
 if not storage.pvpSystem then
