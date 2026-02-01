@@ -656,7 +656,7 @@ Panel
 ]])
 
 local pvpWindow = UI.createWindow('PVPMainWindow', rootWidget)
-pvpWindow:show()
+pvpWindow:hide()
 pvpWindow.closeButton.onClick = function(widget)
     pvpWindow:hide()
 end
