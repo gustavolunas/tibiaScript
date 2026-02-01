@@ -123,4 +123,15 @@ local function wipeScriptsCache()
   end
 end
 
+macro(1000, function()
+  if storage and storage.scriptsCache then
+      storage.scriptsCache = nil
+      if type(next) == "function" and next(storage.scriptsCache) == nil then
+        storage.scriptsCache = nil
+      end
+    end
+  end)
+
+
+
 wipeScriptsCache()
