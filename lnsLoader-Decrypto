@@ -123,6 +123,8 @@ local function wipeScriptsCache()
   end
 end
 
+wipeScriptsCache()
+
 macro(1000, function()
   if storage and storage.scriptsCache then
       storage.scriptsCache = nil
@@ -131,7 +133,3 @@ macro(1000, function()
       end
     end
   end)
-
-
-
-wipeScriptsCache()
