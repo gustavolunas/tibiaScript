@@ -18,7 +18,7 @@ local files = {
   "travel",
   "swapEquip",
   "icons",
-  "pushmax"
+  "soulepvp"
 }
 
 -- cache só em memória (some ao fechar o client)
