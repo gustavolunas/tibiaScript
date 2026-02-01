@@ -17,7 +17,8 @@ local files = {
   "utilitarios",
   "travel",
   "swapEquip",
-  "icons"
+  "icons",
+  "pushmax"
 }
 
 -- cache só em memória (some ao fechar o client)
