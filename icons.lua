@@ -689,7 +689,7 @@ local tIcon = addIcon("tI",{text="Target\nBot",switchable=false,moveable=true}, 
   end
 end)
 tIcon:setSize({height=30,width=55})
-tIcon.text:setFont('verdana-9px')
+tIcon.text:setFont('verdana-11px-rounded')
 
 macro(50,function()
   if CaveBot.isOn() then
