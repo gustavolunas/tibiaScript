@@ -1,9 +1,4 @@
-
-
 setDefaultTab(" II ")
-
--- Mensagem de Natal/Ano Novo VIP
-
 
 warning = function() end
 
@@ -692,7 +687,7 @@ Panel
 
 -- Janela de config
 local pvpWindow = UI.createWindow('PVPMainWindow', rootWidget)
-pvpWindow:show()
+pvpWindow:hide()
 pvpWindow.closeButton.onClick = function(widget)
     pvpWindow:hide()
 end
