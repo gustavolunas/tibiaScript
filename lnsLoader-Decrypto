@@ -1,135 +1,185 @@
--- =========================
--- LNS Loader (ordem fixa)
--- - NÃO usa storage para cache
--- - Baixa tudo primeiro e só executa depois que UI estiver pronta
--- - Remove storage.scriptsCache repetidamente (caso outro loader recrie)
--- =========================
+-- =========================================
+-- WIPE TOTAL v4
+-- - limpa arquivos da raiz do config
+-- - limpa conteúdo das subpastas conhecidas
+-- - não depende de remover diretórios
+-- =========================================
 
-local baseUrl = "https://raw.githubusercontent.com/gustavolunas/tibiaScript/refs/heads/master/"
-
-local files = {
-  "main",
-  "combo",
-  "healing",
-  "conditions",
-  "swapRing",
-  "follow",
-  "utilitarios",
-  "travel",
-  "swapEquip",
-  "icons",
-  "pushmaxx"
-}
-
--- cache só em memória (some ao fechar o client)
-local memCache = {} -- [name] = scriptText
-
--- scheduler seguro (não depende do scheduleEvent existir cedo)
-local function later(fn, ms)
-  if type(scheduleEvent) == "function" then
-    return scheduleEvent(fn, ms)
-  end
-  if g_dispatcher and type(g_dispatcher.scheduleEvent) == "function" then
-    return g_dispatcher:scheduleEvent(fn, ms)
-  end
-  return fn()
+local function hasFn(t, k) return t and type(t[k]) == "function" end
+local function safeCall(fn, ...)
+  local ok, res = pcall(fn, ...)
+  if ok then return true, res end
+  return false, nil
 end
 
--- UI pronta = styles aplicados (evita bug do UI.Container)
-local function isUiReady()
-  if not g_game or not g_game.isOnline or not g_game:isOnline() then return false end
-  if not g_ui or type(g_ui.getRootWidget) ~= "function" then return false end
+local function trim(s)
+  return tostring(s or ""):gsub("^%s+", ""):gsub("%s+$", "")
+end
 
-  local root = g_ui.getRootWidget()
-  if not root then return false end
+-- -----------------------------------------
+-- CONFIG ATUAL
+-- -----------------------------------------
+local function getCurrentConfigName()
+  local cfg = modules.game_bot
+    and modules.game_bot.contentsPanel
+    and modules.game_bot.contentsPanel.config
 
-  if root:recursiveGetChildById("gameRootPanel") then return true end
-  if root:recursiveGetChildById("gameInterface") then return true end
+  if not cfg or not hasFn(cfg, "getCurrentOption") then return nil end
+  local opt = cfg:getCurrentOption()
+  if not opt or not opt.text then return nil end
+
+  local name = trim(opt.text)
+  if name == "" then return nil end
+  return name
+end
+
+-- -----------------------------------------
+-- FS HELPERS
+-- -----------------------------------------
+local function dirExists(path)
+  if not g_resources or not hasFn(g_resources, "directoryExists") then return false end
+  local ok, res = safeCall(g_resources.directoryExists, g_resources, path)
+  if ok then return res == true end
+  local ok2, res2 = safeCall(g_resources.directoryExists, path)
+  if ok2 then return res2 == true end
+  return false
+end
+
+local function listFiles(dir, recursive)
+  if not g_resources or not hasFn(g_resources, "listDirectoryFiles") then return {} end
+  local ok, files = safeCall(g_resources.listDirectoryFiles, dir, recursive, false)
+  if ok and type(files) == "table" then return files end
+  return {}
+end
+
+local function deleteFile(path)
+  if not path or path == "" then return false end
+
+  if g_resources then
+    if hasFn(g_resources, "removeFile") then
+      if safeCall(g_resources.removeFile, path) then return true end
+    end
+    if hasFn(g_resources, "deleteFile") then
+      if safeCall(g_resources.deleteFile, path) then return true end
+    end
+  end
+
+  if modules.game_bot and modules.game_bot.g_resources then
+    local gr = modules.game_bot.g_resources
+    if hasFn(gr, "removeFile") then
+      if safeCall(gr.removeFile, path) then return true end
+    end
+    if hasFn(gr, "deleteFile") then
+      if safeCall(gr.deleteFile, path) then return true end
+    end
+  end
 
   return false
 end
 
-local pending = #files
-local started = false
+-- -----------------------------------------
+-- WIPE ROOT FILES
+-- -----------------------------------------
+local function wipeRootFiles(baseDir)
+  if not dirExists(baseDir) then return 0, 0 end
 
-local function runAllInOrder()
-  if started then return end
-  if pending > 0 then return end
+  local files = listFiles(baseDir, false) -- ❗ só raiz
+  local deleted, failed = 0, 0
 
-  if not isUiReady() then
-    later(runAllInOrder, 200)
+  for _, p in ipairs(files) do
+    p = tostring(p or "")
+    -- se não for pasta, apaga
+    if p ~= "" and not dirExists(p) then
+      if deleteFile(p) then
+        deleted = deleted + 1
+      else
+        failed = failed + 1
+      end
+    end
+  end
+
+  return deleted, failed
+end
+
+-- -----------------------------------------
+-- WIPE SUBFOLDERS CONTENT
+-- -----------------------------------------
+local function wipeFolderContents(folder)
+  if not dirExists(folder) then return 0, 0 end
+  local files = listFiles(folder, true)
+
+  local deleted, failed = 0, 0
+  for _, p in ipairs(files) do
+    p = tostring(p or "")
+    if p ~= "" then
+      if deleteFile(p) then
+        deleted = deleted + 1
+      else
+        failed = failed + 1
+      end
+    end
+  end
+
+  return deleted, failed
+end
+
+-- -----------------------------------------
+-- MAIN
+-- -----------------------------------------
+local function run(tries)
+  tries = tries or 25
+
+  local cfgName = getCurrentConfigName()
+  if not cfgName then
+    if tries <= 0 then
+      modules.game_textmessage.displayGameMessage("[WIPE] Não consegui pegar o config atual.")
+      return
+    end
+    schedule(200, function() run(tries - 1) end)
     return
   end
 
-  started = true
+  local base = "/bot/" .. cfgName
 
-  -- delay extra pra garantir que o pack terminou de aplicar style
-  later(function()
-    for i = 1, #files do
-      local name = files[i]
-      local code = memCache[name]
+  local totalDel, totalFail = 0, 0
 
-      if code and code ~= "" then
-        local f = loadstring(code, "@" .. name .. ".lua")
-        if f then
-          pcall(f)
-        end
-      end
-    end
+  -- 1) raiz do config
+  local d1, f1 = wipeRootFiles(base)
+  totalDel = totalDel + d1
+  totalFail = totalFail + f1
 
-    -- limpa cache da memória (opcional)
-    for k in pairs(memCache) do
-      memCache[k] = nil
-    end
-  end, 300)
-end
+  -- 2) subpastas
+  local subs = {
+    "cavebot", "cavebot_configs",
+    "storage",
+    "targetbot", "targetbot_configs",
+    "vBot", "vBot_configs"
+  }
 
-local function fetchOne(name)
-  modules.corelib.HTTP.get(baseUrl .. name .. ".lua", function(script, err)
-    if not err and script and script ~= "" then
-      memCache[name] = script
-    else
-      memCache[name] = ""
-    end
-
-    pending = pending - 1
-    runAllInOrder()
-  end)
-end
-
--- baixa todos de uma vez
-for i = 1, #files do
-  fetchOne(files[i])
-end
-
--- tenta iniciar (vai aguardar UI ficar pronta)
-runAllInOrder()
-
--- =========================
--- Anti scriptsCache (NÃO usa rawset/metatable)
--- Apaga várias vezes pq algum loader antigo pode recriar durante o download
--- =========================
-local tries = 0
-local function wipeScriptsCache()
-  tries = tries + 1
-
-  if storage and storage.scriptsCache ~= nil then
-    storage.scriptsCache = nil
+  for _, s in ipairs(subs) do
+    local d, f = wipeFolderContents(base .. "/" .. s)
+    totalDel = totalDel + d
+    totalFail = totalFail + f
   end
 
-  -- ~10s (50 * 200ms)
-  if tries < 50 then
-    later(wipeScriptsCache, 200)
+  -- 3) também limpa LNS Custom explícita
+  local customs = { "/bot/Lns Custom", "/bot/LNS Custom", "/bot/lns custom" }
+  for _, c in ipairs(customs) do
+    local a, b = wipeRootFiles(c)
+    totalDel = totalDel + a
+    totalFail = totalFail + b
+    for _, s in ipairs(subs) do
+      local d, f = wipeFolderContents(c .. "/" .. s)
+      totalDel = totalDel + d
+      totalFail = totalFail + f
+    end
   end
+
+  modules.game_textmessage.displayGameMessage(
+    string.format("[WIPE] Concluído. deletados=%d falhas=%d", totalDel, totalFail)
+  )
 end
 
-wipeScriptsCache()
-
-macro(1000, function()
-  if storage and storage.scriptsCache then
-      storage.scriptsCache = nil
-      if type(next) == "function" and next(storage.scriptsCache) == nil then
-        storage.scriptsCache = nil
-      end
-    end
-  end)
+schedule(600, function()
+  run()
+end)
